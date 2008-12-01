@@ -1,3 +1,8 @@
 msnp/script/temp
 !msnp/script/temp/ack.pcap
 !msnp/script/temp/bogus.pcap
+*.cmake
+CMakeFiles
+Makefile
+CMakeCache.txt
+msnp/program/boost
