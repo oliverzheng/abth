@@ -7,6 +7,6 @@
 using namespace packetwrapper;
 using namespace std;
 
-PacketObserver::PacketObserver(Interface i)
+PacketObserver::PacketObserver(Interface & i)
 {
 }

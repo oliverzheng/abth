@@ -32,10 +32,9 @@ LINK_DIRECTORIES (${ABTH_SOURCE_DIR}/pcap/${PCAP_DIR}/lib)
 #############################
 
 ADD_LIBRARY (packetwrapper STATIC
-	device.cpp
 	exceptions.cpp
 	interface.cpp
 	address.cpp
 	packetobserver.cpp
-	)
+)
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} wpcap)

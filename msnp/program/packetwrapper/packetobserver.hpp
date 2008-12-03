@@ -8,7 +8,7 @@ namespace packetwrapper {
 class PacketObserver
 {
 public:
-	PacketObserver(Interface i);
+	PacketObserver(Interface & i);
 }; /* class PacketObserver */
 
 } /* namespace packetwrapper */

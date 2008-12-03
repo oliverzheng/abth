@@ -1,5 +1,5 @@
 #include <packetwrapper/packetobserver.hpp>
-#include <packetwrapper/device.hpp>
+#include <packetwrapper/interface.hpp>
 
 #include <iostream>
 
@@ -8,10 +8,12 @@ using namespace std;
 
 int main()
 {
-	list<Interface> ifs = Device::listInterfaces();
-	for (list<Interface>::iterator it = ifs.begin(); it != ifs.end(); it++)
-		cout << (*it).name << endl;
+	try {
+		list<Interface> ifs = Interface::listInterfaces();
+		for (list<Interface>::iterator it = ifs.begin(); it != ifs.end(); it++)
+			cout << (*it).name << " (" << (*it).description << ")" << endl;
+	} catch (...) {
+	}
 
-	PacketObserver * po = new PacketObserver(*(ifs.begin()));
 	return 0;
 }
