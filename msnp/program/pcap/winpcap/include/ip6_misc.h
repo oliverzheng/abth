@@ -25,10 +25,10 @@
  * This file contains a collage of declarations for IPv6 from FreeBSD not present in Windows
  */
 
-#include <winsock2.h>
+#include <windows.h>
 
 #ifndef __MINGW32__
-#include <ws2tcpip.h>
+//#include <ws2tcpip.h>
 #endif /* __MINGW32__ */
 
 #ifndef __MINGW32__
