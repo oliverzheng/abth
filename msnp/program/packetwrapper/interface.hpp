@@ -7,9 +7,9 @@
 #include "exceptions.hpp"
 #include "address.hpp"
 
-namespace packetwrapper {
-
 #include "pcap.h"
+
+namespace packetwrapper {
 
 class Interface
 {
@@ -19,6 +19,7 @@ public:
 	Interface(const Interface & i);
 
 	void open(bool promiscuous) throw(OpenInterfaceException);
+	bool isOpen();
 
 	const std::string name;
 	const std::string description;
@@ -30,6 +31,8 @@ private:
 	          std::list<Address> addresses);
 
 	pcap_t * pcapHandle;
+
+	friend class PacketObserver;
 
 }; /* class Interface */
 

@@ -32,7 +32,6 @@ LINK_DIRECTORIES (${ABTH_SOURCE_DIR}/pcap/${PCAP_DIR}/lib)
 #############################
 
 ADD_LIBRARY (packetwrapper STATIC
-	exceptions.cpp
 	interface.cpp
 	address.cpp
 	packetobserver.cpp

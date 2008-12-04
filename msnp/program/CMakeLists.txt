@@ -2,12 +2,25 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 
 PROJECT (ABTH)
 
+INCLUDE (DefineFlags.cmake)
+
 INCLUDE_DIRECTORIES (${ABTH_SOURCE_DIR}) 
 
 LINK_DIRECTORIES (${ABTH_BINARY_DIR}/lib) 
 SET (EXECUTABLE_OUTPUT_PATH ${ABTH_BINARY_DIR}/bin)
 
-SET (CMAKE_BUILD_TYPE Debug)
+#############################
+#        BOOST SETUP        #
+#############################
+
+SET (Boost_USE_STATIC_LIBS ON)
+SET (Boost_USE_MULTITHREAD ON)
+SET (Boost_ADDITIONAL_VERSIONS "1.37")
+FIND_PACKAGE (Boost REQUIRED COMPONENTS thread)
+
+IF (Boost_FOUND)
+	INCLUDE_DIRECTORIES (${Boost_INCLUDE_DIRS})
+ENDIF (Boost_FOUND)
 
 #############################
 #        PCAP SETUP         *

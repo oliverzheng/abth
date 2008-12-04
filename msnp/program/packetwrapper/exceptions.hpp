@@ -1,6 +1,8 @@
 #ifndef EXCEPTIONS_HPP
 #define EXCEPTIONS_HPP
 
+#include <config/config.hpp>
+
 #include <exception>
 #include <string>
 
@@ -34,6 +36,14 @@ class OpenInterfaceException : public PacketWrapperException
 public:
 	OpenInterfaceException(std::string err) : PacketWrapperException(err) {};
 	virtual ~OpenInterfaceException() throw() {};
+
+}; /* class OpenInterfaceException */
+
+class InvalidInterfaceException : public PacketWrapperException
+{
+public:
+	InvalidInterfaceException() : PacketWrapperException() {};
+	virtual ~InvalidInterfaceException() throw() {};
 
 }; /* class OpenInterfaceException */
 

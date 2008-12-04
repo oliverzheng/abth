@@ -34,6 +34,11 @@ void Interface::open(bool promiscuous) throw(OpenInterfaceException)
 	}
 }
 
+bool Interface::isOpen()
+{
+	return (pcapHandle != NULL);
+}
+
 /* Static Member Methods */
 
 list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
