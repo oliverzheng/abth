@@ -177,7 +177,7 @@ IF (NOT  DEFINEFLAGS_HAS_RUN)
     # -do not warn on "long long" type (int64) although it's not ISO ++ standard. (JW)
     # see http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html 
     SET(CMAKE_CXX_FLAGS_DEBUG 
-      "-g -Wall -pedantic -g3 -ggdb -gdwarf-2 -Wunused-variable -Wno-long-long -Wno-unknown-pragmas -Wno-system-headers -D _DEBUG"
+      "-g -Wall -pedantic -g3 -ggdb -gdwarf-2 -Wunused-variable -Wno-long-long -Wno-unknown-pragmas -Wno-system-headers -D _DEBUG -D _DEBUG_NO_VARIADIC"
       CACHE STRING "Debug builds CMAKE CXX flags " FORCE )
     SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -pedantic -g3 -ggdb -gdwarf-2 -D _DEBUG"
       CACHE STRING "Flags used by the compiler during Debug builds." FORCE )
