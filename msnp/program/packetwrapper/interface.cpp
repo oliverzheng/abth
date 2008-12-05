@@ -1,9 +1,9 @@
 #include "interface.hpp"
-#include <iostream>
 
 #ifndef WIN32
 	#include <sys/socket.h>
 	#include <netinet/in.h>
+	#include <arpa/inet.h>
 #else
 	#include <winsock.h>
 #endif
@@ -11,7 +11,7 @@
 using namespace packetwrapper;
 using namespace std;
 
-Interface::Interface(string name, string description, list<Address> addresses)
+Interface::Interface(string name, string description, Address addresses)
 	: name(name), description(description), addresses(addresses), pcapHandle(NULL)
 {
 }
@@ -52,16 +52,22 @@ list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
 	list<Interface> ifs;
 	
 	for (pcap_if_t * d = alldevs; d != NULL; d = d->next) {
-		list<Address> addrs;
+		string addr, netmask, broadaddr, dstaddr;
+		for (pcap_addr * a = d->addresses; a != NULL; a = a->next) {
+			if (a->addr != NULL)
+				addr = inet_ntoa(((struct sockaddr_in *)a->addr)->sin_addr);
+			if (a->netmask != NULL)
+				netmask = inet_ntoa(((struct sockaddr_in *)a->netmask)->sin_addr);
+			if (a->broadaddr != NULL)
+				broadaddr = inet_ntoa(((struct sockaddr_in *)a->broadaddr)->sin_addr);
+			if (a->dstaddr != NULL)
+				dstaddr = inet_ntoa(((struct sockaddr_in *)a->dstaddr)->sin_addr);
+		}
 
-		/* FIXME: convert these to IP addresses
-		for (pcap_addr * a = d->addresses; a != NULL; a = a->next)
-			addrs.push_back(Address((a->addr) ? iptos(((struct sockaddr_in *)a->addr)->sin_addr.s_addr) : NULL,
-			                        (a->netmask) ? a->netmask->sa_data : NULL,
-			                        (a->broadaddr) ? a->broadaddr->sa_data : NULL,
-			                        (a->dstaddr) ? a->dstaddr->sa_data : NULL));
-		*/
-		ifs.push_back(Interface(d->name, d->description, addrs));
+		ifs.push_back(Interface(d->name, d->description, Address(addr,
+									 netmask,
+									 broadaddr,
+									 dstaddr)));
 	}
 
 	pcap_freealldevs(alldevs);

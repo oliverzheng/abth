@@ -49,3 +49,7 @@ ADD_LIBRARY (packetwrapper STATIC
 	packetobserver.cpp
 )
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} ${PCAP_LIB_DEPENDENCY})
+
+IF (NOT UNIX)
+	TARGET_LINK_LIBRARIES(packetwrapper Ws2_32.lib)
+ENDIF (NOT UNIX)

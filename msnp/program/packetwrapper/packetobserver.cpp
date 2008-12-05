@@ -1,11 +1,13 @@
 #include "packetobserver.hpp"
 
 #include <boost/bind.hpp>
-#include <iostream>
+
+#ifdef _DEBUG
+	#include <iostream>
+#endif
 
 using namespace packetwrapper;
 using namespace boost;
-using namespace std;
 
 PacketObserver::PacketObserver()
 	: pcapHandle(NULL), observable(NULL), captureThread(NULL)

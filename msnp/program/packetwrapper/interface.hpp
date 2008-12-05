@@ -23,12 +23,12 @@ public:
 
 	const std::string name;
 	const std::string description;
-	const std::list<Address> addresses;
+	const Address addresses;
 
 private:
 	Interface(std::string name,
 	          std::string description,
-	          std::list<Address> addresses);
+	          Address addresses);
 
 	pcap_t * pcapHandle;
 
