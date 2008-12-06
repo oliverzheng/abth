@@ -1,4 +1,4 @@
 msnp/script/temp
 !msnp/script/temp/ack.pcap
 !msnp/script/temp/bogus.pcap
-msnp/program/build
+implementation/build
