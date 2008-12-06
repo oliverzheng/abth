@@ -1,4 +1,5 @@
 #include "ipaddress.hpp"
+#include <cstdio>
 
 using namespace packetwrapper;
 using namespace boost;
@@ -22,6 +23,21 @@ bool IPAddress::set(string ipAddress)
 		return false;
 
 	this->ipAddress = ipAddress;
+
+	return true;
+}
+
+bool IPAddress::set(unsigned int ipAddress)
+{
+	this->ipAddress = "";
+
+	char part[4];
+	for (int i = 0; i <= 3; i++) {
+		sprintf(part, "%d", (ipAddress & (0x000F << (i * 4))) >> (i * 4));
+		this->ipAddress += part;
+		if (i != 3)
+			this->ipAddress += ".";
+	}
 
 	return true;
 }

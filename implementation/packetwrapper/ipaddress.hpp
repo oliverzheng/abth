@@ -14,6 +14,7 @@ public:
 
 	std::string get() const;
 	bool set(std::string ipAddress);
+	bool set(unsigned int ipAddress);
 
 private:
 	static const boost::regex ipRegex;
