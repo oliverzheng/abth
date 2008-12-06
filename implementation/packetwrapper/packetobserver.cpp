@@ -2,10 +2,6 @@
 
 #include <boost/bind.hpp>
 
-#ifdef _DEBUG
-	#include <iostream>
-#endif
-
 using namespace packetwrapper;
 using namespace boost;
 
@@ -65,26 +61,19 @@ void PacketObserver::wait()
 void PacketObserver::loop()
 {
 
-#ifdef _DEBUG
 	debug("Entering capture thread");
-#endif
 
 	pcap_pkthdr packetHeader;
 	const u_char * packetData = NULL;
 
-	while ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL)
-	{
-#ifdef _DEBUG
+	while ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL) {
 		debug("Captured packet at %u %6u: packet length = %u",
 		      (unsigned int)packetHeader.ts.tv_sec,
 		      (unsigned int)packetHeader.ts.tv_usec,
 		      (unsigned int)packetHeader.len);
-#endif
+
 		observable->packetReceived();
 	}
 
-#ifdef _DEBUG
 	debug("Exiting capture thread");
-#endif
-
 }
