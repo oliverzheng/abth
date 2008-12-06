@@ -5,7 +5,7 @@
 #include <list>
 
 #include "exceptions.hpp"
-#include "address.hpp"
+#include "interfaceaddress.hpp"
 
 #include "pcap.h"
 
@@ -23,12 +23,12 @@ public:
 
 	const std::string name;
 	const std::string description;
-	const Address addresses;
+	const InterfaceAddress addresses;
 
 private:
 	Interface(std::string name,
 	          std::string description,
-	          Address addresses);
+	          InterfaceAddress addresses);
 
 	pcap_t * pcapHandle;
 

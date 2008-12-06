@@ -45,7 +45,7 @@ LINK_DIRECTORIES (${PCAP_LIB_DIRECTORY})
 
 ADD_LIBRARY (packetwrapper STATIC
 	interface.cpp
-	address.cpp
+	interfaceaddress.cpp
 	packetobserver.cpp
 )
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} ${PCAP_LIB_DEPENDENCY})

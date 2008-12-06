@@ -11,7 +11,7 @@
 using namespace packetwrapper;
 using namespace std;
 
-Interface::Interface(string name, string description, Address addresses)
+Interface::Interface(string name, string description, InterfaceAddress addresses)
 	: name(name), description(description), addresses(addresses), pcapHandle(NULL)
 {
 }
@@ -64,10 +64,10 @@ list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
 				dstaddr = inet_ntoa(((struct sockaddr_in *)a->dstaddr)->sin_addr);
 		}
 
-		ifs.push_back(Interface(d->name, d->description, Address(addr,
-									 netmask,
-									 broadaddr,
-									 dstaddr)));
+		ifs.push_back(Interface(d->name, d->description, InterfaceAddress(addr,
+										  netmask,
+										  broadaddr,
+										  dstaddr)));
 	}
 
 	pcap_freealldevs(alldevs);
