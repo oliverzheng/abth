@@ -1,7 +1,7 @@
 #ifndef INTERFACE_ADDRESS_HPP
 #define INTERFACE_ADDRESS_HPP
 
-#include <string>
+#include "ipaddress.hpp"
 
 namespace packetwrapper {
 
@@ -9,15 +9,15 @@ class InterfaceAddress
 {
 public:
 	InterfaceAddress() {};
-	InterfaceAddress(std::string addr,
-	                 std::string netmask,
-	                 std::string broadaddr,
-	                 std::string dstaddr);
+	InterfaceAddress(IPAddress addr,
+	                 IPAddress netmask,
+	                 IPAddress broadaddr,
+	                 IPAddress dstaddr);
 
-	std::string addr;
-	std::string netmask;
-	std::string broadaddr;
-	std::string dstaddr;
+	IPAddress addr;
+	IPAddress netmask;
+	IPAddress broadaddr;
+	IPAddress dstaddr;
 
 }; /* class InterfaceAddress */
 

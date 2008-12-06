@@ -1,9 +1,8 @@
 #include "interfaceaddress.hpp"
 
 using namespace packetwrapper;
-using namespace std;
 
-InterfaceAddress::InterfaceAddress(string addr, string netmask, string broadaddr, string dstaddr)
+InterfaceAddress::InterfaceAddress(IPAddress addr, IPAddress netmask, IPAddress broadaddr, IPAddress dstaddr)
 	: addr(addr), netmask(netmask), broadaddr(broadaddr), dstaddr(dstaddr)
 {
 }

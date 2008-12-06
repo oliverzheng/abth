@@ -19,6 +19,7 @@ SET (Boost_ADDITIONAL_VERSIONS "1.37")
 FIND_PACKAGE (Boost REQUIRED COMPONENTS
 	date_time
 	thread
+	regex
 )
 
 IF (Boost_FOUND)

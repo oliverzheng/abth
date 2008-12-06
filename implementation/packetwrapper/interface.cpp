@@ -52,16 +52,16 @@ list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
 	list<Interface> ifs;
 	
 	for (pcap_if_t * d = alldevs; d != NULL; d = d->next) {
-		string addr, netmask, broadaddr, dstaddr;
+		IPAddress addr, netmask, broadaddr, dstaddr;
 		for (pcap_addr * a = d->addresses; a != NULL; a = a->next) {
 			if (a->addr != NULL)
-				addr = inet_ntoa(((struct sockaddr_in *)a->addr)->sin_addr);
+				addr.set(inet_ntoa(((struct sockaddr_in *)a->addr)->sin_addr));
 			if (a->netmask != NULL)
-				netmask = inet_ntoa(((struct sockaddr_in *)a->netmask)->sin_addr);
+				netmask.set(inet_ntoa(((struct sockaddr_in *)a->netmask)->sin_addr));
 			if (a->broadaddr != NULL)
-				broadaddr = inet_ntoa(((struct sockaddr_in *)a->broadaddr)->sin_addr);
+				broadaddr.set(inet_ntoa(((struct sockaddr_in *)a->broadaddr)->sin_addr));
 			if (a->dstaddr != NULL)
-				dstaddr = inet_ntoa(((struct sockaddr_in *)a->dstaddr)->sin_addr);
+				dstaddr.set(inet_ntoa(((struct sockaddr_in *)a->dstaddr)->sin_addr));
 		}
 
 		ifs.push_back(Interface(d->name, d->description, InterfaceAddress(addr,

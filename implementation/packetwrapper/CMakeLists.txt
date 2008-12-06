@@ -10,6 +10,7 @@ SET (Boost_ADDITIONAL_VERSIONS "1.37")
 FIND_PACKAGE (Boost REQUIRED COMPONENTS
 	date_time
 	thread
+	regex
 )
 
 IF (Boost_FOUND)
@@ -46,6 +47,7 @@ LINK_DIRECTORIES (${PCAP_LIB_DIRECTORY})
 ADD_LIBRARY (packetwrapper STATIC
 	interface.cpp
 	interfaceaddress.cpp
+	ipaddress.cpp
 	packetobserver.cpp
 )
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} ${PCAP_LIB_DEPENDENCY})
