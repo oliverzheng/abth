@@ -3,6 +3,7 @@
 
 /* Standard Library Includes */
 #include <cstdio>
+#include <cstring>
 
 /* Namespace Declarations */
 using namespace packetwrapper;
@@ -16,6 +17,7 @@ const regex IPAddress::digitRegex("\\d");
 IPAddress::IPAddress()
 	: ipAddress(), ipAddressRaw()
 {
+	memset(macAddress, 0, sizeof(macAddress));
 }
 
 string IPAddress::get() const
@@ -71,6 +73,16 @@ void IPAddress::set(unsigned int ipAddress)
 		if (i != 0)
 			this->ipAddress += ".";
 	}
+}
+
+const unsigned char * IPAddress::getMAC() const
+{
+	return macAddress;
+}
+
+void IPAddress::setMAC(const unsigned char * macAddress)
+{
+	memcpy(this->macAddress, macAddress, sizeof(this->macAddress));
 }
 
 ostream & operator << (ostream & os, const packetwrapper::IPAddress & ipAddress)

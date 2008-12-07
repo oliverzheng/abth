@@ -48,7 +48,6 @@ ADD_LIBRARY (packetwrapper STATIC
 	interface.cpp
 	interfaceaddress.cpp
 	ipaddress.cpp
-	macaddress.cpp
 	packetobserver.cpp
 	tcppacket.cpp
 )

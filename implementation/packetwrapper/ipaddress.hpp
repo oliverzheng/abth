@@ -13,6 +13,9 @@
 
 namespace packetwrapper {
 
+/* Resolve circular dependency */
+class TCPPacket;
+
 /* Representation of an IPv4 address. E.g. 192.168.0.1. */
 class IPAddress
 {
@@ -38,6 +41,19 @@ public:
 	void set(unsigned int ipAddress);
 
 private:
+	/* Retrieves the MAC address.
+	 * Returned is a static array of 6 bytes in big endian order.
+	 * Ownership of data is not transferred to the user.
+	 * E.g. get()[0] = 1 represents the address 1:0:0:0:0:0.
+	 */
+	const unsigned char * getMAC() const;
+
+	/* Sets the MAC address to address.
+	 * Assumes address points to a 6-byte array in big endian order.
+	 * E.g. for 1:0:0:0:0:0, address[0] = 1.
+	 */
+	void setMAC(const unsigned char * macAddress);
+
 	static const boost::regex ipRegex;
 	static const boost::regex digitRegex;
 
@@ -46,6 +62,13 @@ private:
 	 * */
 	std::string ipAddress;
 	unsigned int ipAddressRaw;
+
+	/* Big endian ordered mac address.
+	 * E.g. 1:0:0:0:0:0 corresponds to macAddress[0] = 1.
+	 */
+	unsigned char macAddress[6];
+
+	friend class TCPPacket;
 
 }; /* class IPAddress */
 

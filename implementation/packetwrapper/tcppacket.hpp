@@ -9,6 +9,7 @@
 namespace packetwrapper {
 
 /* Resolve circular dependency */
+class IPAddress;
 class PacketObserver;
 
 /* Abstraction of a TCP packet.

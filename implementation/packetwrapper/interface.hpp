@@ -15,6 +15,9 @@
 
 namespace packetwrapper {
 
+/* Resolve circular dependency */
+class PacketObserver;
+
 /* Abstraction of a network interface.
  * This is the base unit for which network traffic can be captured.
  * Contents of Interface should not be modified by the user.

@@ -13,7 +13,7 @@
 namespace packetwrapper {
 
 /* Resolve circular dependency */
-class TCPPacket;
+class Interface;
 class PacketObservable;
 
 /* Captures packets on a given interface. */
