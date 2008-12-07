@@ -1,7 +1,10 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include "packetwrapper/packetobservable.hpp"
+#include <config/config.hpp>
+
+#include <packetwrapper/packetobservable.hpp>
+#include <packetwrapper/tcppacket.hpp>
 
 namespace logger {
 
@@ -12,7 +15,7 @@ public:
 	virtual ~Logger();
 
 protected:
-	virtual void packetReceived();
+	virtual void packetReceived(packetwrapper::TCPPacket * tcpPacket);
 
 }; /* class Logger */
 

@@ -47,6 +47,15 @@ public:
 
 }; /* class OpenInterfaceException */
 
+class InterfaceFilterException : public PacketWrapperException
+{
+public:
+	InterfaceFilterException() : PacketWrapperException() {};
+	InterfaceFilterException(std::string err) : PacketWrapperException(err) {};
+	virtual ~InterfaceFilterException() throw() {};
+
+}; /* class InterfaceFilterException */
+
 } /* namespace packetwrapper */
 
 #endif /* EXCEPTIONS_HPP */

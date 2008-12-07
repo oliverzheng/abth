@@ -49,6 +49,7 @@ ADD_LIBRARY (packetwrapper STATIC
 	interfaceaddress.cpp
 	ipaddress.cpp
 	packetobserver.cpp
+	tcppacket.cpp
 )
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} ${PCAP_LIB_DEPENDENCY})
 
