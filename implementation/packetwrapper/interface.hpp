@@ -1,6 +1,8 @@
 #ifndef INTERFACE_HPP
 #define INTERFACE_HPP
 
+#include <config/config.hpp>
+
 #include <string>
 #include <list>
 

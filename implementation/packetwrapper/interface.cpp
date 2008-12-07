@@ -29,9 +29,8 @@ void Interface::open(bool promiscuous) throw(OpenInterfaceException)
 	                                 65535,
 	                                 (promiscuous) ? 1 : 0,
 					 0,
-					 errbuf)) == NULL) {
+					 errbuf)) == NULL)
 		throw OpenInterfaceException(errbuf);
-	}
 }
 
 bool Interface::isOpen()
@@ -55,13 +54,13 @@ list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
 		IPAddress addr, netmask, broadaddr, dstaddr;
 		for (pcap_addr * a = d->addresses; a != NULL; a = a->next) {
 			if (a->addr != NULL)
-				addr.set(inet_ntoa(((struct sockaddr_in *)a->addr)->sin_addr));
+				addr.set(ntohl(((struct sockaddr_in *)a->addr)->sin_addr.s_addr));
 			if (a->netmask != NULL)
-				netmask.set(inet_ntoa(((struct sockaddr_in *)a->netmask)->sin_addr));
+				netmask.set(ntohl(((struct sockaddr_in *)a->netmask)->sin_addr.s_addr));
 			if (a->broadaddr != NULL)
-				broadaddr.set(inet_ntoa(((struct sockaddr_in *)a->broadaddr)->sin_addr));
+				broadaddr.set(ntohl(((struct sockaddr_in *)a->broadaddr)->sin_addr.s_addr));
 			if (a->dstaddr != NULL)
-				dstaddr.set(inet_ntoa(((struct sockaddr_in *)a->dstaddr)->sin_addr));
+				dstaddr.set(ntohl(((struct sockaddr_in *)a->dstaddr)->sin_addr.s_addr));
 		}
 
 		ifs.push_back(Interface(d->name, d->description, InterfaceAddress(addr,

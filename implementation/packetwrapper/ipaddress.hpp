@@ -1,6 +1,8 @@
 #ifndef IP_ADDRESS_HPP
 #define IP_ADDRESS_HPP
 
+#include <config/config.hpp>
+
 #include <string>
 #include <ostream>
 #include <boost/regex.hpp>
@@ -13,13 +15,18 @@ public:
 	IPAddress();
 
 	std::string get() const;
+	const char * getCStr() const;
+	unsigned int getRaw() const;
+
 	bool set(std::string ipAddress);
 	bool set(unsigned int ipAddress);
 
 private:
 	static const boost::regex ipRegex;
+	static const boost::regex digitRegex;
 
 	std::string ipAddress;
+	unsigned int ipAddressRaw;
 
 }; /* class IPAddress */
 
