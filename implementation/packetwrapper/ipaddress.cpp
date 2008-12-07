@@ -33,15 +33,22 @@ bool IPAddress::set(string ipAddress)
 	if (!regex_match(ipAddress, ipRegex))
 		return false;
 
-	this->ipAddress = ipAddress;
-
 	sregex_token_iterator i(ipAddress.begin(), ipAddress.end(), digitRegex, -1);
 	sregex_token_iterator j;
 
-	ipAddressRaw = 0;
+	unsigned int ipAddressRawNew = 0;
 
-	while(i != j)
-		ipAddressRaw = (ipAddressRaw << 8) | atoi(string(*i++).c_str());
+	while(i != j) {
+		int octet = atoi(string(*i++).c_str());
+		if ((octet >> 8) != 0)
+			return false;
+
+		ipAddressRaw = (ipAddressRaw << 8) | octet;
+	}
+
+	ipAddressRaw = ipAddressRawNew;
+
+	this->ipAddress = ipAddress;
 
 	return true;
 }
