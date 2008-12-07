@@ -1,12 +1,14 @@
 #ifndef DEBUG_HPP
 #define DEBUG_HPP
 
+/* Silence Compiler Warning */
 #ifdef _DEBUG_NO_VARIADIC
 	#pragma GCC system_header
 #endif
 
 #ifdef _DEBUG
 
+/* Standard Library Includes */
 #include <iostream>
 #include <cstdio>
 
@@ -21,4 +23,4 @@
 
 #endif /* _DEBUG */
 
-#endif
+#endif /* DEBUG_HPP */

@@ -1,8 +1,10 @@
 #ifndef EXCEPTIONS_HPP
 #define EXCEPTIONS_HPP
 
+/* Project Includes */
 #include <config/config.hpp>
 
+/* Standard Library Exceptions */
 #include <exception>
 #include <string>
 
@@ -23,6 +25,7 @@ protected:
 
 }; /* class PacketWrapperException */
 
+
 class ListInterfacesException : public PacketWrapperException
 {
 public:
@@ -30,6 +33,7 @@ public:
 	virtual ~ListInterfacesException() throw() {};
 
 }; /* class ListInterfacesException */
+
 
 class OpenInterfaceException : public PacketWrapperException
 {
@@ -39,6 +43,7 @@ public:
 
 }; /* class OpenInterfaceException */
 
+
 class InvalidInterfaceException : public PacketWrapperException
 {
 public:
@@ -46,6 +51,7 @@ public:
 	virtual ~InvalidInterfaceException() throw() {};
 
 }; /* class OpenInterfaceException */
+
 
 class InterfaceFilterException : public PacketWrapperException
 {

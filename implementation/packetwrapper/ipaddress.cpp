@@ -1,10 +1,15 @@
+/* Project Includes */
 #include "ipaddress.hpp"
+
+/* Standard Library Includes */
 #include <cstdio>
 
+/* Namespace Declarations */
 using namespace packetwrapper;
 using namespace boost;
 using namespace std;
 
+/* Static Const Member Declarations */
 const regex IPAddress::ipRegex("(\\d{1,3}\\.){3}\\d{1,3}");
 const regex IPAddress::digitRegex("\\d");
 
@@ -53,7 +58,7 @@ bool IPAddress::set(string ipAddress)
 	return true;
 }
 
-bool IPAddress::set(unsigned int ipAddress)
+void IPAddress::set(unsigned int ipAddress)
 {
 	ipAddressRaw = ipAddress;
 
@@ -66,8 +71,6 @@ bool IPAddress::set(unsigned int ipAddress)
 		if (i != 0)
 			this->ipAddress += ".";
 	}
-
-	return true;
 }
 
 ostream & operator << (ostream & os, const packetwrapper::IPAddress & ipAddress)

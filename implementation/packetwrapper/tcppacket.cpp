@@ -1,17 +1,17 @@
+/* Project Includes */
 #include "tcppacket.hpp"
+
+/* Standard Library Includes */
 #include <cstring>
 
+/* System Includes */
 #ifndef WIN32
 	#include <arpa/inet.h>
 #else
 	#include <winsock.h>
 #endif
 
-#define ETHERNET_HEADER_SIZE	(14)
-#define TCP_FLAG_BIT_ACK	(1 << 4)
-#define TCP_FLAG_BIT_RST	(1 << 2)
-#define TCP_FLAG_BIT_SYN	(1 << 1)
-
+/* Namespace Declarations */
 using namespace packetwrapper;
 using namespace std;
 
@@ -29,6 +29,7 @@ TCPPacket::TCPPacket(TCPPacket & other)
 	ackFlag(other.ackFlag), rstFlag(other.rstFlag), synFlag(other.synFlag),
 	length(other.length), dataLength(other.dataLength), data(NULL)
 {
+	/* Deep copy the data */
 	unsigned char * newData = new unsigned char[dataLength];
 	memcpy(newData, other.data, dataLength);
 
@@ -60,19 +61,20 @@ bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 		unsigned short dstPort;
 		unsigned int seq;
 		unsigned int ack;
-		unsigned char doff; /* data offset + reserved */
+		unsigned char doff;
 		unsigned char flags;
 		unsigned char window;
 		unsigned short checksum;
 		unsigned short urgent;
 	} TCPHeader;
 
-	/* Skip ethernet header */
+	/* Skip Ethernet header to IP header */
 	IPHeader * ipHeader = (IPHeader *) (payload + ETHERNET_HEADER_SIZE);
 
 	srcIP.set(ntohl(ipHeader->srcAddress));
 	dstIP.set(ntohl(ipHeader->dstAddress));
 
+	/* Skip to TCP header */
 	TCPHeader * tcpHeader = (TCPHeader *) ((const unsigned char *) ipHeader + (ipHeader->version_hdrlength & 0x0F) * 4);
 
 	srcPort = ntohs(tcpHeader->srcPort);
@@ -85,14 +87,20 @@ bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 	synFlag = ((tcpHeader->flags & TCP_FLAG_BIT_SYN) != 0);
 	rstFlag = ((tcpHeader->flags & TCP_FLAG_BIT_RST) != 0);
 
+	/* Skip to TCP data */
 	const unsigned char * packetData = (const unsigned char *) tcpHeader + ((tcpHeader->doff & 0xF0) >> 4) * 4;
 
+	/* Length of the data as indicated in the IP header */
 	length = ntohs(ipHeader->length) - (packetData - (const unsigned char *) ipHeader);
+
+	/* Length of the data actually captured */
 	dataLength = payloadLength - (packetData - payload);
 
+	/* There may be an Ethernet footer, which results when captured data size exceeds actual data size. Trim it off. */
 	if (dataLength > length)
 		dataLength = length;
 
+	/* Copy only the data */
 	unsigned char * newData = new unsigned char[dataLength];
 	memcpy(newData, packetData, dataLength);
 

@@ -1,7 +1,10 @@
+/* Project Includes */
 #include "packetobserver.hpp"
 
+/* Additional Library Includes */
 #include <boost/bind.hpp>
 
+/* Namespace Declarations */
 using namespace packetwrapper;
 using namespace boost;
 
@@ -53,6 +56,7 @@ bool PacketObserver::start() throw(InvalidInterfaceException, InterfaceFilterExc
 	if (captureThread != NULL)
 		return false;
 
+	/* Capture only TCP/IP packets with the libpcap filter */
 	struct bpf_program filter;
 
 	if (pcap_compile(pcapHandle, &filter, PCAP_FILTER_DEFAULT, 1, netmask) < 0)
@@ -68,7 +72,8 @@ bool PacketObserver::start() throw(InvalidInterfaceException, InterfaceFilterExc
 
 void PacketObserver::wait()
 {
-	captureThread->join();
+	if (captureThread != NULL)
+		captureThread->join();
 }
 
 void PacketObserver::loop()

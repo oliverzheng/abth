@@ -1,5 +1,7 @@
+/* Project Includes */
 #include "interface.hpp"
 
+/* System Includes */
 #ifndef WIN32
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -8,6 +10,7 @@
 	#include <winsock.h>
 #endif
 
+/* Namespace Declarations */
 using namespace packetwrapper;
 using namespace std;
 

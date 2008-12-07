@@ -1,13 +1,11 @@
+/* Project Includes */
 #include "logger.hpp"
 
+/* Namespace Declarations */
 using namespace logger;
 using namespace packetwrapper;
 
 Logger::Logger()
-{
-}
-
-Logger::~Logger()
 {
 }
 
