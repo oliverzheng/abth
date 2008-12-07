@@ -9,15 +9,15 @@ class InterfaceAddress
 {
 public:
 	InterfaceAddress() {};
-	InterfaceAddress(IPAddress addr,
-	                 IPAddress netmask,
-	                 IPAddress broadaddr,
-	                 IPAddress dstaddr);
+	InterfaceAddress(const IPAddress & addr,
+	                 const IPAddress & netmask,
+	                 const IPAddress & broadaddr,
+	                 const IPAddress & dstaddr);
 
-	IPAddress addr;
-	IPAddress netmask;
-	IPAddress broadaddr;
-	IPAddress dstaddr;
+	const IPAddress addr;
+	const IPAddress netmask;
+	const IPAddress broadaddr;
+	const IPAddress dstaddr;
 
 }; /* class InterfaceAddress */
 

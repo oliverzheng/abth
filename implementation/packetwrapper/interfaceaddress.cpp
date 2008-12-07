@@ -2,7 +2,7 @@
 
 using namespace packetwrapper;
 
-InterfaceAddress::InterfaceAddress(IPAddress addr, IPAddress netmask, IPAddress broadaddr, IPAddress dstaddr)
+InterfaceAddress::InterfaceAddress(const IPAddress & addr, const IPAddress & netmask, const IPAddress & broadaddr, const IPAddress & dstaddr)
 	: addr(addr), netmask(netmask), broadaddr(broadaddr), dstaddr(dstaddr)
 {
 }
