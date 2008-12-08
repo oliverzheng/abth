@@ -43,6 +43,12 @@ TCPPacket::~TCPPacket()
 
 bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 {
+	typedef struct EthernetHeader {
+		unsigned char dstAddress[6];
+		unsigned char srcAddress[6];
+		unsigned short type;
+	} EthernetHeader;
+
 	typedef struct IPHeader{
 		unsigned char version_hdrlength;
 		unsigned char type;
@@ -68,8 +74,14 @@ bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 		unsigned short urgent;
 	} TCPHeader;
 
-	/* Skip Ethernet header to IP header */
-	IPHeader * ipHeader = (IPHeader *) (payload + ETHERNET_HEADER_SIZE);
+	/* Extract Ethernet header */
+	EthernetHeader * ethernetHeader = (EthernetHeader *) payload;
+
+	dstIP.setMAC(ethernetHeader->dstAddress);
+	srcIP.setMAC(ethernetHeader->srcAddress);
+
+	/* Skip to IP header */
+	IPHeader * ipHeader = (IPHeader *) (payload + sizeof(EthernetHeader));
 
 	srcIP.set(ntohl(ipHeader->srcAddress));
 	dstIP.set(ntohl(ipHeader->dstAddress));
