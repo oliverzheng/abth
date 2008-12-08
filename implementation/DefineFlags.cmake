@@ -339,9 +339,11 @@ IF (NOT  DEFINEFLAGS_HAS_RUN)
     # 4127 : conditional expression is constant
     # 4189 : local variable initialized but not referenced
     # 4251 : dll interafce missing 
+    # 4290 : function specifies non-empty exception throws
     # 4512 : could not generate assignment operator
     # 4702 : unreachable code
-    SET(FLAGS_WARN_OFF "/wd4100 /wd4127 /wd4189 /wd4251 /wd4512 /wd4702")
+    # 4996 : sprintf safety
+    SET(FLAGS_WARN_OFF "/wd4100 /wd4127 /wd4189 /wd4251 /wd4290 /wd4512 /wd4702 /wd4996")
     SET(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${FLAGS_WARN_OFF}"
       CACHE STRING "Debug builds CMAKE CXX flags " FORCE )

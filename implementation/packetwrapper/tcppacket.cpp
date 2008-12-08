@@ -109,7 +109,7 @@ unsigned char * TCPPacket::construct()
 	/* Construct IP header */
 	ipHeader->version_hdrlength = (ipHeader->VERSION << 4) | (sizeof(*ipHeader) / 4);
 	ipHeader->type = ipHeader->TYPE;
-	ipHeader->length = htons(sizeof(*ipHeader) + sizeof(*tcpHeader) + dataLength);
+	ipHeader->length = htons((unsigned short) (sizeof(*ipHeader) + sizeof(*tcpHeader) + dataLength));
 
 	ipHeader->identification = htons(ipHeader->IDENTIFICATION);
 	ipHeader->flags_fo = htons(ipHeader->FLAGS_FO);
@@ -133,7 +133,7 @@ unsigned char * TCPPacket::construct()
 
 	ipChecksum = (~ipChecksum) & 0xFFFF;
 
-	ipHeader->checksum = htons(ipChecksum);
+	ipHeader->checksum = htons((unsigned short) ipChecksum);
 	
 	/* Construct TCP header */
 	tcpHeader->srcPort = htons(srcPort);
@@ -178,9 +178,9 @@ unsigned char * TCPPacket::construct()
     	while (tcpChecksum >> 16)
 		tcpChecksum = (tcpChecksum & 0xFFFF) + (tcpChecksum >> 16);
 		
-	tcpChecksum = ~tcpChecksum;
+	tcpChecksum = ~(tcpChecksum & 0xFFFF);
 
-	tcpHeader->checksum = htons(tcpChecksum);
+	tcpHeader->checksum = htons((unsigned short) tcpChecksum);
 
 	return packet;
 }
