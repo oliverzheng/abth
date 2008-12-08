@@ -9,28 +9,8 @@ using namespace packetwrapper;
 using namespace boost;
 
 PacketObserver::PacketObserver()
-	: pcapHandle(NULL), netmask(0xFFFFFFFF), observable(NULL), captureThread(NULL)
+	: observable(NULL), captureThread(NULL)
 {
-}
-
-bool PacketObserver::setInterface(Interface & i)
-{
-	if (!i.isOpen())
-		return false;
-
-	pcapHandle = i.pcapHandle;
-
-	if (!i.addresses.netmask.get().empty())
-		netmask = i.addresses.netmask.getRaw();
-	else
-		netmask = 0xFFFFFFFF;
-
-	return true;
-}
-
-bool PacketObserver::isInterfaceSet()
-{
-	return (pcapHandle != NULL);
 }
 
 bool PacketObserver::setObservable(PacketObservable * observable)

@@ -16,7 +16,7 @@
 namespace packetwrapper {
 
 /* Resolve circular dependency */
-class PacketObserver;
+class InterfaceApp;
 
 /* Abstraction of a network interface.
  * This is the base unit for which network traffic can be captured.
@@ -51,7 +51,7 @@ private:
 	pcap_t * pcapHandle;
 
 	/* Let PacketObserver access pcapHandle */
-	friend class PacketObserver;
+	friend class InterfaceApp;
 
 }; /* class Interface */
 

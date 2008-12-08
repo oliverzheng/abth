@@ -5,6 +5,7 @@
 #include <config/config.hpp>
 #include "interface.hpp"
 #include "packetobservable.hpp"
+#include "interfaceapp.hpp"
 
 /* Additional Library Includes */
 #include <boost/thread.hpp>
@@ -17,17 +18,10 @@ class Interface;
 class PacketObservable;
 
 /* Captures packets on a given interface. */
-class PacketObserver
+class PacketObserver : public InterfaceApp
 {
 public:
 	PacketObserver();
-
-	/* Use an opened interface.
-	 * Returns true if interface is open and will be used, otherwise false.
-	 */
-	bool setInterface(Interface & i);
-
-	bool isInterfaceSet();
 
 	/* Forward captured packets to a PacketObservable.
 	 * Returns true if observable is not null and will be used, otherwise false.
@@ -48,13 +42,6 @@ public:
 private:
 	/* Thread entry */
 	void loop();
-
-	pcap_t * pcapHandle;
-
-	/* IP subnet mask for which the capture filter is set.
-	 * Should be retrieved from the interface being captured on.
-	 */
-	unsigned int netmask;
 
 	PacketObservable * observable;
 

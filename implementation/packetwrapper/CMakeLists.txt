@@ -47,6 +47,7 @@ LINK_DIRECTORIES (${PCAP_LIB_DIRECTORY})
 ADD_LIBRARY (packetwrapper STATIC
 	interface.cpp
 	interfaceaddress.cpp
+	interfaceapp.cpp
 	ipaddress.cpp
 	packetobserver.cpp
 	tcppacket.cpp
