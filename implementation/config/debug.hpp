@@ -13,9 +13,11 @@
 #include <cstdio>
 
 #define debug(...) \
-	std::cout << __FUNCTION__ << ": "; \
-	printf(__VA_ARGS__); \
-	std::cout << std::endl;
+	do { \
+		std::cout << __FUNCTION__ << ": "; \
+		printf(__VA_ARGS__); \
+		std::cout << std::endl; \
+	} while (0);
 
 #else /* _DEBUG */
 
