@@ -62,6 +62,15 @@ public:
 
 }; /* class InterfaceFilterException */
 
+
+class PacketInjectException : public PacketWrapperException
+{
+public:
+	PacketInjectException(std::string err) : PacketWrapperException(err) {};
+	virtual ~PacketInjectException() throw() {};
+
+}; /* class PacketInjectException */
+
 } /* namespace packetwrapper */
 
 #endif /* EXCEPTIONS_HPP */

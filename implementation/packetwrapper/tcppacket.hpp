@@ -5,12 +5,14 @@
 #include <config/config.hpp>
 #include "ipaddress.hpp"
 #include "packetobserver.hpp"
+#include "packetinjector.hpp"
 
 namespace packetwrapper {
 
 /* Resolve circular dependency */
 class IPAddress;
 class PacketObserver;
+class PacketInjector;
 
 /* Abstraction of a TCP packet.
  * Users may inherit from this class for application-specific packets.
@@ -24,10 +26,10 @@ public:
 
 	~TCPPacket();
 
-	unsigned int srcPort;
+	unsigned short srcPort;
 	IPAddress srcIP;
 
-	unsigned int dstPort;
+	unsigned short dstPort;
 	IPAddress dstIP;
 
 	unsigned int seq;
@@ -51,8 +53,15 @@ public:
 private:
 	bool parse(const unsigned char * payload, unsigned int payloadLength);
 
+	/* Constructs a full packet with Ethernet, IP, and TCP headers.
+	 * Returned buffer has length FULL_HEADER_SIZE + dataLength.
+	 * Ownership of returned buffer is transferred to the user.
+	 */
+	unsigned char * construct();
+
 	/* Let PacketObserver parse a raw packet */
 	friend class PacketObserver;
+	friend class PacketInjector;
 
 }; /* class TCPPacket */
 
