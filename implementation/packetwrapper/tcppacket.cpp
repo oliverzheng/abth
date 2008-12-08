@@ -1,5 +1,6 @@
 /* Project Includes */
 #include "tcppacket.hpp"
+#include "networkheaders.hpp"
 
 /* Standard Library Includes */
 #include <cstring>
@@ -43,37 +44,6 @@ TCPPacket::~TCPPacket()
 
 bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 {
-	typedef struct EthernetHeader {
-		unsigned char dstAddress[6];
-		unsigned char srcAddress[6];
-		unsigned short type;
-	} EthernetHeader;
-
-	typedef struct IPHeader{
-		unsigned char version_hdrlength;
-		unsigned char type;
-		unsigned short length;
-		unsigned short identification;
-		unsigned short flags_fo;
-		unsigned char ttl;
-		unsigned char protocol;
-		unsigned short checksum;
-		unsigned int srcAddress;
-		unsigned int dstAddress;
-	} IPHeader;
-
-	typedef struct TCPHeader {
-		unsigned short srcPort;
-		unsigned short dstPort;
-		unsigned int seq;
-		unsigned int ack;
-		unsigned char doff;
-		unsigned char flags;
-		unsigned char window;
-		unsigned short checksum;
-		unsigned short urgent;
-	} TCPHeader;
-
 	/* Extract Ethernet header */
 	EthernetHeader * ethernetHeader = (EthernetHeader *) payload;
 
