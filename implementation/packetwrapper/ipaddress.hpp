@@ -55,7 +55,7 @@ private:
 	void setMAC(const unsigned char * macAddress);
 
 	static const boost::regex ipRegex;
-	static const boost::regex digitRegex;
+	static const boost::regex delimiterRegex;
 
 	/* Two representations of the IP address are used for efficiency.
 	 * All operations should keep them synchronized.

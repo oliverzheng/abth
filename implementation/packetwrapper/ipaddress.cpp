@@ -12,7 +12,7 @@ using namespace std;
 
 /* Static Const Member Declarations */
 const regex IPAddress::ipRegex("(\\d{1,3}\\.){3}\\d{1,3}");
-const regex IPAddress::digitRegex("\\d");
+const regex IPAddress::delimiterRegex("\\.");
 
 IPAddress::IPAddress()
 	: ipAddress(), ipAddressRaw()
@@ -40,7 +40,7 @@ bool IPAddress::set(string ipAddress)
 	if (!regex_match(ipAddress, ipRegex))
 		return false;
 
-	sregex_token_iterator i(ipAddress.begin(), ipAddress.end(), digitRegex, -1);
+	sregex_token_iterator i(ipAddress.begin(), ipAddress.end(), delimiterRegex, -1);
 	sregex_token_iterator j;
 
 	unsigned int ipAddressRawNew = 0;
@@ -50,7 +50,7 @@ bool IPAddress::set(string ipAddress)
 		if ((octet >> 8) != 0)
 			return false;
 
-		ipAddressRaw = (ipAddressRaw << 8) | octet;
+		ipAddressRawNew = (ipAddressRawNew << 8) | octet;
 	}
 
 	ipAddressRaw = ipAddressRawNew;
