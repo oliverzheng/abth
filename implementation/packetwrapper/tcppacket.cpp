@@ -151,6 +151,9 @@ unsigned char * TCPPacket::construct()
 	tcpHeader->checksum = 0;
 	tcpHeader->urgent = 0;
 
+	/* Copy data */
+	memcpy(packet + FULL_HEADER_SIZE, data, dataLength);
+
 	/* Calculate TCP checksum */
 
 	unsigned int tcpChecksum = 0;
@@ -178,9 +181,6 @@ unsigned char * TCPPacket::construct()
 	tcpChecksum = ~tcpChecksum;
 
 	tcpHeader->checksum = htons(tcpChecksum);
-
-	/* Copy data */
-	memcpy(packet + FULL_HEADER_SIZE, data, dataLength);
 
 	return packet;
 }
