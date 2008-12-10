@@ -42,10 +42,10 @@ public:
 	ECommandType getCommand() const throw(CommandNotSetException);
 	int getTransactionID() const throw(TransactionIDNotSetException);
 
+private:
 	/* Parse raw TCP data into an MSNP packet */
 	void parse();
 
-private:
 	ECommandType command;
 	bool commandSet;
 
@@ -70,7 +70,6 @@ private:
 	static CommandStructure commandStructures[];
 
 	CommandStructure * findCommandStructure(ECommandType command) const;
-	static void setupRegexes();
 
 }; /* class MSNPPacket */
 
