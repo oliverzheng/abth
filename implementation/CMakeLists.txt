@@ -44,3 +44,4 @@ INCLUDE_DIRECTORIES (${ABTH_SOURCE_DIR}/pcap/${PCAP_DIR}/include)
 
 ADD_SUBDIRECTORY (packetwrapper)
 ADD_SUBDIRECTORY (msnplogger)
+ADD_SUBDIRECTORY (msnpabth)
