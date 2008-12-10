@@ -10,26 +10,24 @@ void MSNPABTH::packetReceived(TCPPacket * tcpPacket)
 {
 	MSNPPacket msnpPacket(*tcpPacket);
 
-	msnpPacket.parse();
-
 	switch (msnpPacket.getCommand()) {
 		case MSNPPacket::UNSUPPORTED:
-			debug("unsupported");
+			//debug("unsupported");
 			break;
 		case MSNPPacket::PING:
 			debug("ping");
 			break;
 		case MSNPPacket::PING_RESPONSE:
-			debug("ping response");
+			debug("ping response %d", msnpPacket.getTransactionID());
 			break;
 		case MSNPPacket::CHALLENGE:
 			debug("challenge");
 			break;
 		case MSNPPacket::CHALLENGE_RESPONSE:
-			debug("challenge response");
+			debug("challenge response %d", msnpPacket.getTransactionID());
 			break;
 		case MSNPPacket::CHALLENGE_RETURN:
-			debug("challenge result");
+			debug("challenge result %d", msnpPacket.getTransactionID());
 			break;
 		default:
 			break;

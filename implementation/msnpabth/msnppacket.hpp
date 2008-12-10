@@ -51,6 +51,8 @@ private:
 
 	int transactionID;
 
+	static std::string transactionIDRegex;
+
 	/* Each command can be constructed into <prefix> <transaction id> <postfix>.
 	 * E.g. ping's prefix is "PNG " and postfix is "\r\n" to form "PNG <transaction ID>\r\n".
 	 * transactionID indicates its requirement for the command.
@@ -61,10 +63,11 @@ private:
 		const char * prefix;
 		const char * postfix;
 		boost::regex * commandRegex;
+		CommandStructure(ECommandType command, bool transactionID, const char * prefix, const char * postfix, bool useRegex);
+		~CommandStructure();
 	};
 
 	static CommandStructure commandStructures[];
-	static std::string transactionIDRegex;
 
 	CommandStructure * findCommandStructure(ECommandType command) const;
 	static void setupRegexes();

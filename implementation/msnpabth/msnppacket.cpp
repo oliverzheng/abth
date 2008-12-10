@@ -11,28 +11,46 @@ using namespace msnpabth;
 using namespace boost;
 using namespace std;
 
+string MSNPPacket::transactionIDRegex("(\\d+)");
+
 MSNPPacket::CommandStructure MSNPPacket::commandStructures[] =
 {
-	{CHALLENGE,		false,	"CHL ",	"0 12345678901234567890\r\n",	NULL},
-	{CHALLENGE_RESPONSE,	true,	"QRY ",	" \\s+ \\d+\r\n\\s+",		NULL},
-	{CHALLENGE_RETURN,	true,	"QRY ",	"\r\n",				NULL},
-	{PING,			false,	"PNG",	"\r\n",				NULL},
-	{PING_RESPONSE,		true,	"QNG ",	"\r\n",				NULL},
-	{UNSUPPORTED,		false,	NULL,	NULL,				NULL},
+	CommandStructure(CHALLENGE,		false,	"CHL ",	"0 12345678901234567890\r\n",	false),
+	CommandStructure(CHALLENGE_RESPONSE,	true,	"QRY ",	" \\S+ \\d+\r\n\\w+",		true),
+	CommandStructure(CHALLENGE_RETURN,	true,	"QRY ",	"\r\n",				true),
+	CommandStructure(PING,			false,	"PNG",	"\r\n",				true),
+	CommandStructure(PING_RESPONSE,		true,	"QNG ",	"\r\n",				true),
+	CommandStructure(UNSUPPORTED,		false,	NULL,	NULL,				false),
 };
 
-string MSNPPacket::transactionIDRegex("(\\d+)");
+MSNPPacket::CommandStructure::CommandStructure(ECommandType command, bool transactionID, const char * prefix, const char * postfix, bool useRegex)
+	: command(command), transactionID(transactionID), prefix(prefix), postfix(postfix), commandRegex(NULL)
+{
+	if (useRegex) {
+		string commandRegexString = prefix;
+		if (transactionID)
+			commandRegexString += transactionIDRegex;
+		commandRegexString += postfix;
+
+		commandRegex = new regex(commandRegexString);
+	}
+}
+
+MSNPPacket::CommandStructure::~CommandStructure()
+{
+	if (commandRegex != NULL)
+		delete commandRegex;
+}
 
 MSNPPacket::MSNPPacket()
 	: command(UNSUPPORTED), commandSet(false), transactionID(-1)
 {
-	setupRegexes();
 }
 
 MSNPPacket::MSNPPacket(TCPPacket & tcpPacket)
 	: TCPPacket(tcpPacket), command(UNSUPPORTED), commandSet(false), transactionID(-1)
 {
-	setupRegexes();
+	parse();
 }
 
 void MSNPPacket::setCommand(ECommandType command, int transactionID) throw(CommandNotSetException, TransactionIDNotSetException)
@@ -86,24 +104,30 @@ int MSNPPacket::getTransactionID() const throw(TransactionIDNotSetException)
 
 void MSNPPacket::parse()
 {
+	command = UNSUPPORTED;
 	commandSet = true;
 
-	for (CommandStructure * commandStructure = commandStructures; commandStructure->command != UNSUPPORTED; commandStructure++) {
-		string dataString((const char *) data, dataLength);
-		cmatch match;
+	transactionID = -1;
 
-		if (regex_match(dataString.c_str(), match, *(commandStructure->commandRegex))) {
+	CommandStructure * commandStructure = NULL;
+
+	string dataString((const char *) data, dataLength);
+	cmatch match;
+
+	for (commandStructure = commandStructures; commandStructure->command != UNSUPPORTED; commandStructure++) {
+		if (commandStructure->commandRegex == NULL)
+			continue;
+
+		if (regex_match(dataString.c_str(), match, *(commandStructure->commandRegex)))
+			break;
+	}
+
+	if (commandStructure->command != UNSUPPORTED) {
 			command = commandStructure->command;
 
 			if (commandStructure->transactionID)
 				transactionID = atoi(string(match[1].first, match[1].second).c_str());
-			return;
-		}
 	}
-
-	command = UNSUPPORTED;
-
-	transactionID = -1;
 }
 
 MSNPPacket::CommandStructure * MSNPPacket::findCommandStructure(ECommandType command) const
@@ -114,21 +138,4 @@ MSNPPacket::CommandStructure * MSNPPacket::findCommandStructure(ECommandType com
 			break;
 
 	return commandStructure;
-}
-
-void MSNPPacket::setupRegexes()
-{
-	static bool setup = false;
-	if (!setup) {
-		for (CommandStructure * commandStructure = commandStructures; commandStructure->command != UNSUPPORTED; commandStructure++) {
-			string commandRegexString = commandStructure->prefix;
-			if (commandStructure->transactionID)
-				commandRegexString += transactionIDRegex;
-			commandRegexString += commandStructure->postfix;
-
-			commandStructure->commandRegex = new regex(commandRegexString);
-		}
-
-		setup = true;
-	}
 }
