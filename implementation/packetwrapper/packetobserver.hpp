@@ -11,6 +11,9 @@
 #include <boost/thread.hpp>
 #include <pcap.h>
 
+/* Standard Library Includes */
+#include <string>
+
 namespace packetwrapper {
 
 /* Resolve circular dependency */
@@ -30,6 +33,8 @@ public:
 
 	bool isObservableSet();
 
+	void setFilter(std::string filterString) throw(InvalidInterfaceException, InterfaceFilterException);
+
 	/* Start capturing on the interface, if it is set and the observable is also set.
 	 * Launches a new thread from which event handlers of new packets will be called.
 	 * Returns true if capturing has successfully been started, false otherwise.
@@ -40,6 +45,9 @@ public:
 	void wait();
 
 private:
+	static const char * pcapDefaultFilter;
+	std::string appFilter;
+
 	/* Thread entry */
 	void loop();
 

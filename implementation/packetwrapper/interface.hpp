@@ -48,6 +48,7 @@ private:
 	          std::string description,
 	          InterfaceAddress addresses);
 
+	static const int captureTimeout = 200;
 	pcap_t * pcapHandle;
 
 	/* Let PacketObserver access pcapHandle */

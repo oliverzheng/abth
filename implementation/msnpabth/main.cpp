@@ -66,6 +66,8 @@ int main()
 	po->setInterface(*it);
 	po->setObservable(msnpabth);
 
+	po->setFilter("port 1863");
+
 	po->start();
 	po->wait();
 

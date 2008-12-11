@@ -4,9 +4,15 @@
 /* Additional Library Includes */
 #include <boost/bind.hpp>
 
+/* Standard Library Includes */
+#include <sstream>
+
 /* Namespace Declarations */
 using namespace packetwrapper;
 using namespace boost;
+using namespace std;
+
+const char * PacketObserver::pcapDefaultFilter = "ip and tcp";
 
 PacketObserver::PacketObserver()
 	: observable(NULL), captureThread(NULL)
@@ -28,6 +34,20 @@ bool PacketObserver::isObservableSet()
 	return (observable != NULL);
 }
 
+void PacketObserver::setFilter(string filterString) throw(InvalidInterfaceException, InterfaceFilterException)
+{
+	if (pcapHandle == NULL)
+		throw InvalidInterfaceException();
+
+	/* Test to see if filter can be compiled */
+	struct bpf_program filter;
+
+	if (pcap_compile(pcapHandle, &filter, (char *) filterString.c_str(), 1, netmask) < 0)
+		throw InterfaceFilterException(pcap_geterr(pcapHandle));
+
+	appFilter = filterString;
+}
+
 bool PacketObserver::start() throw(InvalidInterfaceException, InterfaceFilterException)
 {
 	if (pcapHandle == NULL)
@@ -36,10 +56,17 @@ bool PacketObserver::start() throw(InvalidInterfaceException, InterfaceFilterExc
 	if (captureThread != NULL)
 		return false;
 
+	ostringstream filterString;
+
+	filterString << pcapDefaultFilter;
+
+	if (!appFilter.empty())
+		filterString << " and (" << appFilter << ")";
+
 	/* Capture only TCP/IP packets with the libpcap filter */
 	struct bpf_program filter;
 
-	if (pcap_compile(pcapHandle, &filter, PCAP_FILTER_DEFAULT, 1, netmask) < 0)
+	if (pcap_compile(pcapHandle, &filter, (char *) filterString.str().c_str(), 1, netmask) < 0)
 		throw InterfaceFilterException(pcap_geterr(pcapHandle));
 
 	if (pcap_setfilter(pcapHandle, &filter) < 0)
@@ -63,17 +90,18 @@ void PacketObserver::loop()
 	pcap_pkthdr packetHeader;
 	const unsigned char * packetData = NULL;
 
-	while ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL) {
-		debug("Captured packet at %u %6u: packet length = %u",
-		      (unsigned int)packetHeader.ts.tv_sec,
-		      (unsigned int)packetHeader.ts.tv_usec,
-		      (unsigned int)packetHeader.len);
+	while (true)
+		if ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL) {
+			debug("Captured packet at %u %6u: packet length = %u",
+			      (unsigned int)packetHeader.ts.tv_sec,
+			      (unsigned int)packetHeader.ts.tv_usec,
+			      (unsigned int)packetHeader.len);
 
-		TCPPacket * tcpPacket = new TCPPacket();
-		tcpPacket->parse(packetData, packetHeader.caplen);
+			TCPPacket * tcpPacket = new TCPPacket();
+			tcpPacket->parse(packetData, packetHeader.caplen);
 
-		observable->packetReceived(tcpPacket);
-	}
+			observable->packetReceived(tcpPacket);
+		}
 
 	debug("Exiting capture thread");
 }

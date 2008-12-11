@@ -31,7 +31,7 @@ void Interface::open(bool promiscuous) throw(OpenInterfaceException)
 	if ((pcapHandle = pcap_open_live(name.c_str(),
 	                                 65535,
 	                                 (promiscuous) ? 1 : 0,
-					 0,
+					 captureTimeout,
 					 errbuf)) == NULL)
 		throw OpenInterfaceException(errbuf);
 }
