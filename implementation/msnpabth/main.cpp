@@ -50,18 +50,9 @@ int main()
 
 	PacketInjector * pi = new PacketInjector();
 	pi->setInterface(*it);
-	MSNPPacket * msnpPacket = new MSNPPacket();
-	msnpPacket->srcIP.set("123.156.189.102");
-	msnpPacket->dstIP.set("187.154.121.98");
-	msnpPacket->srcPort = 9876;
-	msnpPacket->dstPort = 1863;
-	msnpPacket->ackFlag = true;
-	msnpPacket->setCommand(MSNPPacket::CHALLENGE);
-
-	//pi->inject(*msnpPacket);
 
 	PacketObserver * po = new PacketObserver();
-	PacketObservable * msnpabth = new MSNPABTH();
+	PacketObservable * msnpabth = new MSNPABTH(pi);
 
 	po->setInterface(*it);
 	po->setObservable(msnpabth);

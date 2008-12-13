@@ -50,6 +50,7 @@ ADD_LIBRARY (packetwrapper STATIC
 	interfaceapp.cpp
 	ipaddress.cpp
 	packetinjector.cpp
+	packetobservable.cpp
 	packetobserver.cpp
 	tcppacket.cpp
 )

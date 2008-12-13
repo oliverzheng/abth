@@ -14,9 +14,12 @@ class TCPPacket;
 /* An interface to which captured packets will be sent. */
 class PacketObservable
 {
+public:
+	virtual ~PacketObservable() = 0;
+
 protected:
-	/* Ownership of packet is transfered to the implementation of PacketObservable. */
-	virtual void packetReceived(TCPPacket * packet) = 0;
+	/* Ownership of packet is not transfered to the implementation of PacketObservable. */
+	virtual void packetReceived(TCPPacket & packet) = 0;
 
 	/* Let Packetobserver call packetReceived. */
 	friend class PacketObserver;

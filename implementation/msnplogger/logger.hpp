@@ -17,7 +17,7 @@ public:
 	Logger();
 
 protected:
-	virtual void packetReceived(packetwrapper::TCPPacket * tcpPacket);
+	virtual void packetReceived(packetwrapper::TCPPacket & tcpPacket);
 
 }; /* class Logger */
 

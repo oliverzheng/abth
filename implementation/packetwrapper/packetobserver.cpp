@@ -97,8 +97,8 @@ void PacketObserver::loop()
 			      (unsigned int)packetHeader.ts.tv_usec,
 			      (unsigned int)packetHeader.len);
 
-			TCPPacket * tcpPacket = new TCPPacket();
-			tcpPacket->parse(packetData, packetHeader.caplen);
+			TCPPacket tcpPacket;
+			tcpPacket.parse(packetData, packetHeader.caplen);
 
 			observable->packetReceived(tcpPacket);
 		}
