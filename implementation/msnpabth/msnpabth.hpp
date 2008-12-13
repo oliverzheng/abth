@@ -12,7 +12,7 @@ namespace msnpabth {
 class MSNPABTH : public packetwrapper::PacketObservable
 {
 public:
-	MSNPABTH(packetwrapper::PacketInjector * packetInjector);
+	MSNPABTH(packetwrapper::PacketObserver * packetObserver, packetwrapper::PacketInjector * packetInjector);
 
 protected:
 	virtual void packetReceived(packetwrapper::TCPPacket & tcpPacket);
@@ -49,6 +49,7 @@ protected:
 
 	bool started;
 	packetwrapper::PacketInjector * packetInjector;
+	packetwrapper::PacketObserver * packetObserver;
 
 	unsigned int nthPing;
 	unsigned int nthChallenge;

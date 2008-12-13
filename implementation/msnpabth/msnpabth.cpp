@@ -7,8 +7,8 @@ using namespace packetwrapper;
 
 const char * MSNPABTH::INVITE_MESSAGE = "1312697181 127.0.0.1:1863 CKI 17021696.318151 eece412alice@hotmail.com Alice U messenger.msn.com 1";
 
-MSNPABTH::MSNPABTH(PacketInjector * packetInjector)
-	: started(false), packetInjector(packetInjector), nthPing(0), nthChallenge(0)
+MSNPABTH::MSNPABTH(PacketObserver * packetObserver, PacketInjector * packetInjector)
+	: started(false), packetInjector(packetInjector), packetObserver(packetObserver), nthPing(0), nthChallenge(0)
 {
 }
 
@@ -144,4 +144,5 @@ bool MSNPABTH::sendChallenge(MSNPPacket & challengeResponse)
 void MSNPABTH::sendInvite()
 {
 	packetInjector->inject(invite);
+	packetObserver->stop();
 }

@@ -50,7 +50,7 @@ public:
 	InvalidInterfaceException() : PacketWrapperException() {};
 	virtual ~InvalidInterfaceException() throw() {};
 
-}; /* class OpenInterfaceException */
+}; /* class InvalidInterfaceException */
 
 
 class InterfaceFilterException : public PacketWrapperException

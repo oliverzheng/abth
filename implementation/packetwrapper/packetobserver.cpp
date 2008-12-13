@@ -15,7 +15,7 @@ using namespace std;
 const char * PacketObserver::pcapDefaultFilter = "ip and tcp";
 
 PacketObserver::PacketObserver()
-	: observable(NULL), captureThread(NULL)
+	: observable(NULL), captureThread(NULL), running(false)
 {
 }
 
@@ -72,9 +72,16 @@ bool PacketObserver::start() throw(InvalidInterfaceException, InterfaceFilterExc
 	if (pcap_setfilter(pcapHandle, &filter) < 0)
 		throw InterfaceFilterException(pcap_geterr(pcapHandle));
 
+	running = true;
+
 	captureThread = new thread(bind(&PacketObserver::loop, this));
 
 	return true;
+}
+
+void PacketObserver::stop()
+{
+	running = false;
 }
 
 void PacketObserver::wait()
@@ -90,7 +97,7 @@ void PacketObserver::loop()
 	pcap_pkthdr packetHeader;
 	const unsigned char * packetData = NULL;
 
-	while (true)
+	while (running)
 		if ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL) {
 			debug("Captured packet at %u %6u: packet length = %u",
 			      (unsigned int)packetHeader.ts.tv_sec,

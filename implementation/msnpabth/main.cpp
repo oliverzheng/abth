@@ -52,7 +52,7 @@ int main()
 	pi->setInterface(*it);
 
 	PacketObserver * po = new PacketObserver();
-	PacketObservable * msnpabth = new MSNPABTH(pi);
+	PacketObservable * msnpabth = new MSNPABTH(po, pi);
 
 	po->setInterface(*it);
 	po->setObservable(msnpabth);

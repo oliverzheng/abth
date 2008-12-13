@@ -41,6 +41,9 @@ public:
 	 */
 	bool start() throw(InvalidInterfaceException, InterfaceFilterException);
 
+	/* Exits the capture thread */
+	void stop();
+
 	/* Blocks until the capture thread exits */
 	void wait();
 
@@ -54,6 +57,8 @@ private:
 	PacketObservable * observable;
 
 	boost::thread * captureThread;
+
+	bool running;
 
 }; /* class PacketObserver */
 
