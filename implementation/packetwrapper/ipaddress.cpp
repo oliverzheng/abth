@@ -20,6 +20,17 @@ IPAddress::IPAddress()
 	memset(macAddress, 0, sizeof(macAddress));
 }
 
+IPAddress & IPAddress::operator=(const IPAddress & other)
+{
+	if (this != &other) {
+		ipAddress = other.ipAddress;
+		ipAddressRaw = other.ipAddressRaw;
+		memcpy(macAddress, other.macAddress, sizeof(macAddress));
+	}
+
+	return *this;
+}
+
 string IPAddress::get() const
 {
 	return ipAddress;

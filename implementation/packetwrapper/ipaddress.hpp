@@ -22,6 +22,8 @@ class IPAddress
 public:
 	IPAddress();
 
+	IPAddress & operator=(const IPAddress & other);
+
 	/* Retrieve IP as string. Empty string denotes it has not been set. */
 	std::string get() const;
 
