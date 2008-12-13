@@ -43,6 +43,15 @@ public:
 
 }; /* class TransactionIDNotSetException */
 
+
+class IllegalCommandException : public MSNPABTHException
+{
+public:
+	IllegalCommandException() : MSNPABTHException() {};
+	virtual ~IllegalCommandException() throw() {};
+
+}; /* class TransactionIDNotSetException */
+
 } /* namespace packetwrapper */
 
 #endif /* MSNP_EXCEPTIONS_HPP */

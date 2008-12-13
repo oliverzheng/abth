@@ -15,11 +15,12 @@ string MSNPPacket::transactionIDRegex("(\\d+)");
 
 MSNPPacket::CommandStructure MSNPPacket::commandStructures[] =
 {
-	CommandStructure(CHALLENGE,		false,	"CHL ",	"0 12345678901234567890\r\n",	false),
+	CommandStructure(CHALLENGE,		false,	"CHL ",	"0 29875966221179296547\r\n",	false),
 	CommandStructure(CHALLENGE_RESPONSE,	true,	"QRY ",	" \\S+ \\d+\r\n\\w+",		true),
 	CommandStructure(CHALLENGE_RETURN,	true,	"QRY ",	"\r\n",				true),
 	CommandStructure(PING,			false,	"PNG",	"\r\n",				true),
 	CommandStructure(PING_RESPONSE,		true,	"QNG ",	"\r\n",				true),
+	CommandStructure(INVITE,		false,	"RNG ",	"\r\n",				false),
 	CommandStructure(UNSUPPORTED,		false,	NULL,	NULL,				false),
 };
 
@@ -53,10 +54,13 @@ MSNPPacket::MSNPPacket(TCPPacket & tcpPacket)
 	parse();
 }
 
-void MSNPPacket::setCommand(ECommandType command, int transactionID) throw(CommandNotSetException, TransactionIDNotSetException)
+void MSNPPacket::setCommand(ECommandType command, int transactionID) throw(IllegalCommandException, TransactionIDNotSetException)
 {
 	if (command == UNSUPPORTED)
-		throw CommandNotSetException();
+		throw IllegalCommandException();
+
+	if (command != this->command)
+		custom.erase();
 
 	CommandStructure * commandStructure = findCommandStructure(command);
 
@@ -74,16 +78,31 @@ void MSNPPacket::setCommand(ECommandType command, int transactionID) throw(Comma
 		delete data;
 
 	string commandData = commandStructure->prefix;
+
 	if (commandStructure->transactionID) {
 		ostringstream transactionIDString;
 		transactionIDString << transactionID;
 		commandData += transactionIDString.str();
-	}
+	} else
+		commandData += custom;
+
 	commandData += commandStructure->postfix;
 
 	dataLength = commandData.length();
 	data = new unsigned char[dataLength];
 	memcpy((unsigned char *) data, commandData.c_str(), dataLength);
+}
+
+void MSNPPacket::setCustom(string custom) throw(CommandNotSetException, IllegalCommandException)
+{
+	if (command == UNSUPPORTED)
+		throw CommandNotSetException();
+
+	if (findCommandStructure(command)->transactionID == true)
+		throw IllegalCommandException();
+
+	this->custom = custom;
+	setCommand(command);
 }
 
 MSNPPacket::ECommandType MSNPPacket::getCommand() const throw(CommandNotSetException)

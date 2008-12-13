@@ -27,6 +27,7 @@ public:
 		CHALLENGE_RETURN,	/* NS -> Client */
 		PING,			/* Client -> NS */
 		PING_RESPONSE,		/* NS -> Client */
+		INVITE,			/* NS -> Client */
 		UNSUPPORTED
 	} ECommandType;
 
@@ -37,7 +38,11 @@ public:
 	 * transactionID may be skipped if the command does not use it.
 	 * transactionID must be positive if used.
 	 */
-	void setCommand(ECommandType command, int transactionID = -1) throw(CommandNotSetException, TransactionIDNotSetException);
+	void setCommand(ECommandType command, int transactionID = -1) throw(IllegalCommandException, TransactionIDNotSetException);
+
+	/* Use a custom string in place of the transaction ID.
+	 * The command itself must not use transaction ID.*/
+	void setCustom(std::string custom) throw(CommandNotSetException, IllegalCommandException);
 
 	ECommandType getCommand() const throw(CommandNotSetException);
 	int getTransactionID() const throw(TransactionIDNotSetException);
@@ -70,6 +75,9 @@ private:
 	static CommandStructure commandStructures[];
 
 	CommandStructure * findCommandStructure(ECommandType command) const;
+
+	/* Custom string to insert in lieu of transaction ID */
+	std::string custom;
 
 }; /* class MSNPPacket */
 
