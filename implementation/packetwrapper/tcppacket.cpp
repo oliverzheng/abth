@@ -4,6 +4,7 @@
 
 /* Standard Library Includes */
 #include <cstring>
+#include <algorithm>
 
 /* System Includes */
 #ifndef WIN32
@@ -18,7 +19,7 @@ using namespace std;
 
 TCPPacket::TCPPacket()
 	: srcPort(0), srcIP(), dstPort(0), dstIP(), seq(0), ack(0),
-	ackFlag(false), rstFlag(false), synFlag(false),
+	ackFlag(false), pshFlag(false), rstFlag(false), synFlag(false),
 	length(0), dataLength(0), data(NULL)
 {
 }
@@ -27,7 +28,7 @@ TCPPacket::TCPPacket(TCPPacket & other)
 	: srcPort(other.srcPort), srcIP(other.srcIP),
 	dstPort(other.dstPort), dstIP(other.dstIP),
 	seq(other.seq), ack(other.ack),
-	ackFlag(other.ackFlag), rstFlag(other.rstFlag), synFlag(other.synFlag),
+	ackFlag(other.ackFlag), pshFlag(other.pshFlag), rstFlag(other.rstFlag), synFlag(other.synFlag),
 	length(other.length), dataLength(other.dataLength), data(NULL)
 {
 	/* Deep copy the data */
@@ -40,6 +41,45 @@ TCPPacket::TCPPacket(TCPPacket & other)
 TCPPacket::~TCPPacket()
 {
 	delete data;
+}
+
+void TCPPacket::useAddress(TCPPacket & other)
+{
+	srcIP = other.srcIP;
+	dstIP = other.dstIP;
+
+	srcPort = other.srcPort;
+	dstPort = other.dstPort;
+}
+
+void TCPPacket::useReverseAddress(TCPPacket & other)
+{
+	srcIP = other.srcIP;
+	dstIP = other.dstIP;
+
+	srcPort = other.srcPort;
+	dstPort = other.dstPort;
+
+	swap(srcIP, dstIP);
+	swap(srcPort, dstPort);
+}
+
+bool TCPPacket::setLength(unsigned int dataLength, unsigned char filling)
+{
+	if (dataLength < this->dataLength)
+		return false;
+
+	unsigned char * newData = new unsigned char[dataLength];
+
+	memset(newData, filling, dataLength);
+	memcpy(newData, data, this->dataLength);
+
+	delete data;
+	data = newData;
+
+	this->dataLength = dataLength;
+
+	return true;
 }
 
 bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
@@ -66,6 +106,7 @@ bool TCPPacket::parse(const unsigned char * payload, unsigned int payloadLength)
 	ack = ntohl(tcpHeader->ack);
 
 	ackFlag = ((tcpHeader->flags & tcpHeader->FLAG_ACK) != 0);
+	pshFlag = ((tcpHeader->flags & tcpHeader->FLAG_PSH) != 0);
 	synFlag = ((tcpHeader->flags & tcpHeader->FLAG_SYN) != 0);
 	rstFlag = ((tcpHeader->flags & tcpHeader->FLAG_RST) != 0);
 
@@ -144,6 +185,7 @@ unsigned char * TCPPacket::construct()
 
 	tcpHeader->doff = (sizeof(*tcpHeader) / 4) << 4;
 	tcpHeader->flags = ((ackFlag) ? tcpHeader->FLAG_ACK : 0) |
+			   ((pshFlag) ? tcpHeader->FLAG_PSH : 0) |
 			   ((rstFlag) ? tcpHeader->FLAG_RST : 0) |
 			   ((synFlag) ? tcpHeader->FLAG_SYN : 0);
 	tcpHeader->window = tcpHeader->WINDOW;

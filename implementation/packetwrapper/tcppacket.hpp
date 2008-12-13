@@ -26,6 +26,16 @@ public:
 
 	~TCPPacket();
 
+	/* Assigns this packet the src and dst address and ports of other */
+	void useAddress(TCPPacket & other);
+
+	/* Assigns this packet's src and dst the dst and src address and ports of other */
+	void useReverseAddress(TCPPacket & other);
+
+	/* Makes data dataLength large, pads additional length with filling.
+	 * Returns true on success, false if dataLength < the existing dataLength. */
+	bool setLength(unsigned int dataLength, unsigned char filling = 0);
+
 	unsigned short srcPort;
 	IPAddress srcIP;
 
@@ -36,6 +46,7 @@ public:
 	unsigned int ack;
 
 	bool ackFlag;
+	bool pshFlag;
 	bool rstFlag;
 	bool synFlag;
 

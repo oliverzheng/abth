@@ -34,6 +34,7 @@ struct IPHeader{
 
 struct TCPHeader {
 	static const unsigned char FLAG_ACK = (1 << 4);
+	static const unsigned char FLAG_PSH = (1 << 3);
 	static const unsigned char FLAG_RST = (1 << 2);
 	static const unsigned char FLAG_SYN = (1 << 1);
 	static const unsigned short WINDOW = 0x4444;
