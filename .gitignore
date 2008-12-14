@@ -2,3 +2,6 @@ msnp/script/temp
 !msnp/script/temp/ack.pcap
 !msnp/script/temp/bogus.pcap
 implementation/build
+papers/eurosec09/abthmsnp.*
+!papers/eurosec09/abthmsnp.bib
+!papers/eurosec09/abthmsnp.tex
