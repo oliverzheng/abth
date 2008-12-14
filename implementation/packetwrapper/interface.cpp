@@ -66,10 +66,8 @@ list<Interface> Interface::listInterfaces() throw(ListInterfacesException)
 				dstaddr.set(ntohl(((struct sockaddr_in *)a->dstaddr)->sin_addr.s_addr));
 		}
 
-		ifs.push_back(Interface(d->name, d->description, InterfaceAddress(addr,
-										  netmask,
-										  broadaddr,
-										  dstaddr)));
+		ifs.push_back(Interface(d->name, (d->description != NULL) ? d->description : "",
+					InterfaceAddress(addr, netmask, broadaddr, dstaddr)));
 	}
 
 	pcap_freealldevs(alldevs);
