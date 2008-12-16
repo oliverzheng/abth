@@ -82,39 +82,82 @@ In this section, we provide background on TCP necessary for understanding the re
 
 \subsection{Overview of TCP}
 
-TCP is a connection-oriented transport protocol that guarantees reliable in-order delivery of packets and minimizes network congestion \cite{rfc:tcp}.
-One way the protocol achieves these properties is through the use of sequence numbers and acknowledgement (ack) numbers.
-All TCP packets contain a sequence number, which represents the n-th byte of data transferred, and an ack number, which represents the last known n-th byte of data received.
-Packets containing data have the SYN and ACK flags set; packets with no data may have the ACK flag set to denote an empty acknowledgement packet.
-Many attacks, including ABTH, on TCP and the upper-layer application protocols exploit vulnerabilities of the sequence and ack numbers mechanism.
-In the following section, we discuss those attacks that are most relevant to ABTH.
+TCP is a connection-oriented transport protocol that guarantees reliable in-order delivery of network packets \cite{rfc:tcp}.
+A pair of hosts initiate contact and communicate by sending packets to each other.
+Each end of the connection is identified by an IP address and a TCP port, both of which are determined prior to establishment of and maintained throughout the connection.
+
+To provide reliable in-order delivery, each packet is tagged with a sequence number, an acknowledgement number, and a receive window, hereon after referred to as seqnum, acknum, and rcvwnd, respectively.
+seqnum represents the n-th byte of data transferred; acknum confirms n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing.
+Packets containing data set the SYN and ACK flags; packets with no data only set the ACK flag to denote an empty acknowledgement packet.
+For every data packet sent, an acknowledgement packet has to be received to affirm packet delivery.
+A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
+
+The seqnum of one host must match acknum of the other and vice versa for the two hosts to be in a synchronized state, in which data packets can be received and processed as valid packets.
+As an example to illustrate seqnum and acknum, a client connects to a server through TCP. After establishing a connection, assume the client is seqnum 50 and the server is seqnum 100.
+The next packet the client sends must entail seqnum 50 and acknum 100.
+If the client sends a data packet of 10 bytes, the client seqnum increases to 60 and the server must send an acknowledgement packet with seqnum 100 and acknum 60.
+
+In the event that either host receives a packet containing an unexpected seqnum, two cases dictate the outcome.
+In the first, the received seqnum is within the range of the expected seqnum and the rcvwnd; that is, the packet received probably arrived before another packet with the expected seqnum.
+In such a case, the data is buffered and no acknowledgement packet is sent. (An acknowledgement packet would confirm the reception of the missing packet.)
+Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum.
+As shown later, this mechanism incites the undesirable effect (for the attacker) of a TCP ack storm \cite{anderson:ackstorm}.
 
 \subsection{Attacks on TCP}
 
-Extensive research on TCP has resulted in the development of a variety of techniques for exploiting TCP/IP protocols.
-These attacks include ARP poisoning, IP spoofing, ICMP redirection, DNS poisoning, TCP man-in-themiddle, and combinations of thereof \cite{harris:tcpattacks, gregg:stackhack, joncheray:simpleattack}.
-In contrast to denial of service attacks (e.g., TCP SYN flood, IP “ping of death”), the purpose of these attacks is to penetrate and compromise systems.
-The aforementioned attacks are widely documented and there exists numerous tools (e.g., Hunt, Snort, Ettercap, and Juggernaut) to scan for or exploit TCP vulnerabilities in systems \cite{scrambray:exposed}.
+Many attacks on TCP exploit vulnerabilities of the seqnum and acknum synchronization mechanism.
+We discuss some attacks pertinent to ABTH first in order demonstrate the usefulness of ABTH.
+All of these attacks, including ABTH, assume the threat model that the attacker is able to listen to network traffic of a TCP session and inject spoofed packets into the network.
+None of these attacks, including ABTH, aims to disable either host, for example, by launching a denial-of-service attack; rather, the aim of all these attacks is to circumvent detection and compromise systems without knowledge of the victims.
+Thus, the attacker cannot delete or reroute network traffic.
 
-Many commercial Internet service providers (ISPs) and corporate networks have adopted protection mechanisms provided by switches and routers, which effectively thwart these attacks.
-The success of these attacks typically depends on the exploitation of two or more vulnerabilities.
-For example, TCP man-in-themiddle, also known as TCP session hijacking, requires the capability to view network traffic and to execute ARP poisoning \cite{stamp:infosec}, the latter of which is normally disabled by modern switched equipment \cite{spangler:sniffing}.
+\subsubsection{TCP Hijacking}
 
-In the case of TCP session hijacking, by eavesdropping on a TCP session, an attacker is able to calculate the expected sequence and ack numbers and can than proceed to inject a spoofed TCP packet.
-The spoofed packet would contain the numbers expected by the recipient and the source IP address of the legitimate sender.
-Although the packet was sent by a spoofed sender, the recipient would accept the packet as an authenticate packet.
-However, following this spoof, the connection is effectively broken as the expected sequence and ack numbers of the sender and receiver are no longer in sync.
-ABTH improves upon conventional TCP session hijacking allowing an attacker to re-synchronize TCP state machines of the legitimate sender and receiver.
+By eavesdropping on a TCP session, an attacker can observe seqnums and acknums of both hosts and can inject a spoofed TCP packet \cite{harris:tcpattacks}.
+The spoofed packet would contain the numbers expected by the recipient and the source address of the the other host.
+Although the packet was sent by the attacker, the recipient has no way of authenticating the source of the packet and thus would accept it as a valid packet.
+However, following this spoof, the connection is effectively broken as the expected seqnums and acknums of the two hosts are out of sync.
+Data packets sent to either host would be regarded as invalid due to the mismatch of numbers, and no acknowledgement packets are sent back.
+Thus, the connection is quickly reset by both hosts.
+Both host would notice a disruption in network service and may suspect an attack.
 
-Vanilla TCP session hijacking has also the disadvantage of ensuing an ACK storm \cite{anderson:ackstorm}, in which both the sender and receiver continuously transmit ACK packets, each trying to correct the other with its own sequence and ack numbers.
-An RST packet typically follows an ACK storm causing a disconnection of the TCP connection.
-As a result of the disconnection, the user, either the sender or the receiver, would notice a hang in the application indicating the attack.
-Thus, vanilla TCP session hijacking is practical only if a packet containing one command could accomplish the objective(s) of the adversary.
-In order to prevent an ACK storm, the attacker can ARP poison both ends of the connection and then relay messages for the rest of the session.
-However, as mentioned before, most Ethernet switching equipment provides means of preventing ARP poisoning.
+\subsubsection{Man-in-the-Middle}
+
+Following a TCP hijacking attack, the attacker can act as the man-in-the-middle, by relaying all messages from one host to the other \cite{joncheray:simpleattack, greg:stackhack}.
+Each host would receive acknowledgement for every sent packet, since the attacker is injecting a spoofed packet for each packet sent by translating seqnums and acknums on the fly.
+However, a problem arises when each host receives the original packets sent by each other.
+As previously mentioned, a packet is considered valid if its seqnum falls within the range of the expected seqnum and the rcvwnd.
+Spoofed packets cause the spoofed host to lag behind on its seqnum, and thus packets sent from the spoofed host are not in the acceptable range.
+Then for each packet the spoofed host sends, the other host drops it and sends back an acknowledgement packet with the expected seqnum and acknum trying to correct this desynchronization.
+The spoofed host would try to do the same by sending an acknowledgement packet, which incites the other host to send another.
+This repeated cycle of sending packets creates an ack storm, in which both hosts continuously send empty packets.
+
+While the ack storm stops as soon as one packet is dropped due to the unreliability of the underlying physical network, it creates a massive load of network traffic \cite{joncheray:simpleattack}.
+Intrusion detection systems can characterize this load with statistical analysis of empty packets on the network and notify users of a possible attack.
+
+\subsubsection{ARP Poisoning}
+
+One way of avoiding TCP ack storms is to stop hosts from receiving legitimate packets.
+While the attacker cannot delete or reroute packets, the attacker can utilize Address Resolution Protocol (ARP) poisoning to mislead hosts into ignoring legitimate packets.
+ARP provides translation of IP address to MAC address.
+If ARP poisoned with the wrong MAC address, a host will send TCP/IP packets to the wrong MAC address and ignore incoming packets from the real MAC address.
+The attacker needs only to ARP poison one host to circumvent ack storms, as the compromised host will not respond to the other host.
+
+However, ARP traffic does not travel beyond the local area network (LAN) and imposes the restriction that the attacker be within the same LAN as at least one host.
+More importantly, ARP poisoning is a low network level attack that can be easily prevented with hardware enforcement \cite{spangler:sniffing}.
+Most hardware switches disable ARP poisoning.
+
+\subsubsection{Restoring Synchronization}
+
+The attacker can try to resynchronize both hosts by inciting the lagging host to send packets manually \cite{lam:resync}.
+As an example on the TELNET protocol, the attacker may send a notice to the user to type in a few characters.
+However, slightly more experienced users will easily detect such a peculiarity as an attack.
+
+As discussed, existing attacks on TCP do not provide much guarantee for an attack to be executed unnoticed.
 
 \section{Application-Based TCP Hijacking}
 
+ABTH improves upon conventional TCP session hijacking allowing an attacker to re-synchronize TCP state machines of the legitimate sender and receiver.
 We developed an extension of the existing TCP session hijacking attacks.
 Application Based TCP Hijacking (ABTH) re-establishes the validity of the connection between the client and the server without utilizing ARP poisoning or any other techniques below the transport layer.
 ABTH achieves this objective through the exploitation of vulnerabilities found in the application-layer protocol; therefore, ABTH design is specific to each application protocol.
