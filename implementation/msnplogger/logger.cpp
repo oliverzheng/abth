@@ -3,6 +3,7 @@
 
 /* Namespace Declarations */
 using namespace logger;
+using namespace msnp;
 using namespace packetwrapper;
 
 Logger::Logger()

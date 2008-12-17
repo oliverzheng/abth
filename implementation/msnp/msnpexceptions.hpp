@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 
-namespace msnpabth {
+namespace msnp {
 
 class MSNPABTHException : public std::exception
 {

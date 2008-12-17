@@ -3,7 +3,7 @@
 
 /* Project Includes */
 #include <config/config.hpp>
-#include "msnppacket.hpp"
+#include <msnp/msnppacket.hpp>
 #include <packetwrapper/packetobservable.hpp>
 #include <packetwrapper/packetinjector.hpp>
 
@@ -30,22 +30,22 @@ protected:
 	static const unsigned int INVITE_LENGTH = 120;
 
 	/* Create packets beforehand */
-	void createPackets(MSNPPacket & pingResponse);
+	void createPackets(msnp::MSNPPacket & pingResponse);
 
 	/* Returns true if the last ping has been sent */
 	bool sendPing();
 
 	/* Returns true if the last challenge return has been sent */
-	bool sendChallenge(MSNPPacket & challengeResponse);
+	bool sendChallenge(msnp::MSNPPacket & challengeResponse);
 
 	/* Sends final invite */
 	void sendInvite();
 
-	MSNPPacket pings[PING_NUM];
+	msnp::MSNPPacket pings[PING_NUM];
 	packetwrapper::TCPPacket pingResponseAcks[PING_NUM];
-	MSNPPacket challenges[CHALLENGE_NUM];
-	MSNPPacket challengeReturns[CHALLENGE_NUM];
-	MSNPPacket invite;
+	msnp::MSNPPacket challenges[CHALLENGE_NUM];
+	msnp::MSNPPacket challengeReturns[CHALLENGE_NUM];
+	msnp::MSNPPacket invite;
 
 	bool started;
 	packetwrapper::PacketInjector * packetInjector;

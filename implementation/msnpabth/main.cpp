@@ -1,7 +1,7 @@
 #include <packetwrapper/packetobserver.hpp>
 #include <packetwrapper/interface.hpp>
+#include <msnp/msnppacket.hpp>
 #include "msnpabth.hpp"
-#include "msnppacket.hpp"
 
 #include <iostream>
 
@@ -61,6 +61,8 @@ int main()
 
 	po->start();
 	po->wait();
+
+	delete ifs;
 
 	return 0;
 }

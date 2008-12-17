@@ -7,7 +7,7 @@
 #include <sstream>
 
 /* Namespace Declarations */
-using namespace msnpabth;
+using namespace msnp;
 using namespace boost;
 using namespace std;
 

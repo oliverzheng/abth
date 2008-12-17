@@ -2,6 +2,7 @@
 #include "msnpabth.hpp"
 
 /* Namespace Declarations */
+using namespace msnp;
 using namespace msnpabth;
 using namespace packetwrapper;
 
