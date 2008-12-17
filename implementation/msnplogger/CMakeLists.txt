@@ -4,4 +4,4 @@ ADD_EXECUTABLE (msnplogger
 	main.cpp
 	logger.cpp
 )
-TARGET_LINK_LIBRARIES (msnplogger packetwrapper)
+TARGET_LINK_LIBRARIES (msnplogger packetwrapper msnp)
