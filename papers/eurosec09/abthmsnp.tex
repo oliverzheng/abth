@@ -157,43 +157,33 @@ As discussed, existing attacks on TCP do not provide much guarantee for an attac
 
 \section{Application-Based TCP Hijacking}
 
-ABTH improves upon conventional TCP session hijacking allowing an attacker to re-synchronize TCP state machines of the legitimate sender and receiver.
-We developed an extension of the existing TCP session hijacking attacks.
-Application Based TCP Hijacking (ABTH) re-establishes the validity of the connection between the client and the server without utilizing ARP poisoning or any other techniques below the transport layer.
-ABTH achieves this objective through the exploitation of vulnerabilities found in the application-layer protocol; therefore, ABTH design is specific to each application protocol.
-ABTH has two requirements on the capabilities of the adversary: the abilities to view network traffic and to spoof IP packets.
-Both of these requirements are satisfied when the attacker and the victim (i.e., either the client or the server but not necessarily both) are co-located on the same local area network (LAN).
+ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection.
+It is a specific way of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer.
+By exploiting vulnerabilities in the combination of TCP and application protocol, ABTH allows an attacker to send a spoofed packet and quickly restore TCP synchronization without victims detecting such event.
+The technique assumes the same threat model as TCP hijacking described in the background section.
 
-Many application protocols intended for twoway communication, such as Telnet and FTP, maintain a persistent TCP connection.
-The persistent TCP connection serves two purposes: it maintains an application session and bypasses network address translation (NAT) restrictions.
-The former purpose allows applications to limit the frequency of relatively costly steps, such as authentication, to once-per-session and allows future commands to be sent without verification of the sender’s identity.
-The latter purpose enables bi-directional commands that are capable of traversing through NAT devices, a critical requirement for some applications, e.g., instant messaging.
+Many application protocols intended for two-way communication, such as TELNET and FTP, maintain a persistent TCP connection.
+To ensure the connection is open, a host periodically sends application ping commands to the other host.
+Application-level commands, such as ping, feature two characteristics of particular importance: they prompt automatic response from the other host and do not modify application states.
+These two characteristics give way for the attacker bring a lagging seqnnm of a host up to a desired seqnum. 
 
-Furthermore, application protocols typically specify trivial commands that do not modify the state of applications.
-An example of such a command is ping, which is used to ensure the validity of the open connection.
+ABTH exploits these seemingly trivial commands at the TCP level to perform TCP hijacking and resynchronization.
+As a ping to a host can provoke a response and thus inflate its seqnum, assuming ping responses exceed the data length of pings, the injection of certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
+As such, an attacker can spoof a packet containing a malicious command and cover up the spoof by sending innocuous commands.
 
-ABTH exploits these seemingly trivial commands to perform session hijacking and TCP stack resynchronization.
-ATBH repairs the broken connection by realigning the sequence and ack numbers of both the server and client using seemingly trivial commands.
-Besides ping command (or its equivalents), application protocols typically provide the client and server with asymmetric commands, which leads to different commands for the client and the server.
-If the server ping and the client ping have different data lengths, the injection of certain multiples of each ping could counterbalance the original difference created by the injected packet.
-As each ping to the server and client inflate the sequence and ack numbers of the server and client, respectively, the injection of a carefully calculated number of pings directed to each side of the connection can result in the re-synchronization of the server and the client.
+The order in which these packets are injected should follow a specific rule in order to avoid an ack storm.
+For a packet sent by each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, and the acknum should not be larger than the seqnum of the recipient host.
+For the attacker, this means alternate sending packets between the two hosts for them to catch up to each other.
+If followed roughly, only a few ack packets would be sent and no ack storm would occur.
+
 Once this is achieved, the connection is repaired and new legitimate and illegitimate application commands can be received and processed successfully.
-It is assumed that the server and client pings have different lengths, but as the WLM case study will show, this assumption is not particularly important if whitespace padding is allowed to arbitrarily increase the size of packets.
-
-During the repair phase, once the recipient receives a ping, it replies with an ACK packet.
-As the ACK packet does not correspond to the expected sequence and ack numbers of the spoofed sender, the sender quickly replies with its own ACK packet, thus initiating an ACK storm.
-However, this ACK storm is short-lived as an attacker then proceeds to inject a new ping with correctly calculated numbers to comfort the server and/or client.
-This ACK storm stops immediately, and no RST packets are sent to disconnect the session.
-This process continues until the sequence and ack numbers of each side of the connection are re-aligned.
-
-In comparison to typical TCP hijacking methods which involve exploits on lower layers of the network stack \cite{stamp:infosec}, for which detection and prevention mechanisms are commonly put in place, the exploitation of the application protocol allows ABTH to avoid the use of ARP poisoning and other exploits prohibited and impractical in well-controlled networks as well as to evade existing intrusion detection systems.
+In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits the combination of TCP and application protocol and executes an attack that not only follows the specification of the TCP and application protocol but maintains a statistically low profile of network footprint.
+This allows the attacker to carry out an attack, without exploits prohibited and impractical in well-controlled networks, and evade existing intrusion detection systems.
+The significance of ABTH provides the attacker an exit strategy in which the attack may be executed unnoticed, if carefully calculated.
 
 To demonstrate the feasibility and effectiveness of ABTH, we next describe our experience with employing our attack to compromise Windows Live Messenger.
 
-\section{Case Study: Attacking Windows Live Messenger with ABTH}
-
-First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the world’s most popular instant messaging (IM) services.
-Current version of WLM utilizes Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service \cite{piccard:imsecurity}.
+\section{Case Study: Attacking Windows Live Messenger with ABTH} First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the world’s most popular instant messaging (IM) services.  Current version of WLM utilizes Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service \cite{piccard:imsecurity}.
 
 \subsection{.NET Messenger Service}
 
