@@ -3,8 +3,8 @@
 
 /* Project Includes */
 #include <config/config.hpp>
+#include <msnp/msnppacket.hpp>
 #include <packetwrapper/packetobservable.hpp>
-#include <packetwrapper/tcppacket.hpp>
 
 /* An implementation of PacketObservable.
  * Logs an averaged frequency of packets received for a given client.

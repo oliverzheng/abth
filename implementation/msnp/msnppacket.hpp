@@ -11,7 +11,7 @@
 /* Standard Library Includes */
 #include <string>
 
-namespace msnpabth {
+namespace msnp {
 
 class MSNPPacket : public packetwrapper::TCPPacket
 {

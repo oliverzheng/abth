@@ -42,6 +42,7 @@ INCLUDE_DIRECTORIES (${ABTH_SOURCE_DIR}/pcap/${PCAP_DIR}/include)
 #      PROJECTS SETUP       *
 #############################
 
+ADD_SUBDIRECTORY (msnp)
 ADD_SUBDIRECTORY (packetwrapper)
 ADD_SUBDIRECTORY (msnplogger)
 ADD_SUBDIRECTORY (msnpabth)

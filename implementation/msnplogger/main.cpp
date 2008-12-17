@@ -1,5 +1,6 @@
 #include <packetwrapper/packetobserver.hpp>
 #include <packetwrapper/interface.hpp>
+#include <msnp/msnppacket.hpp>
 #include "logger.hpp"
 
 #include <iostream>
@@ -52,6 +53,8 @@ int main()
 
 	po->setInterface(*it);
 	po->setObservable(logger);
+
+	po->setFilter("port 1863");
 
 	po->start();
 	po->wait();
