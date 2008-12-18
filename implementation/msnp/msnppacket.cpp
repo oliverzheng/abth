@@ -15,12 +15,13 @@ string MSNPPacket::transactionIDRegex("(\\d+)");
 
 MSNPPacket::CommandStructure MSNPPacket::commandStructures[] =
 {
-	CommandStructure(CHALLENGE,		false,	"CHL ",	"0 29875966221179296547\r\n",	false),
-	CommandStructure(CHALLENGE_RESPONSE,	true,	"QRY ",	" \\S+ \\d+\r\n\\w+",		true),
+	CommandStructure(CHALLENGE,			false,	"CHL ",	"0 29875966221179296547\r\n",	false),
+	CommandStructure(CHALLENGE_RESPONSE,true,	"QRY ",	" \\S+ \\d+\r\n\\w+",		true),
 	CommandStructure(CHALLENGE_RETURN,	true,	"QRY ",	"\r\n",				true),
-	CommandStructure(PING,			false,	"PNG",	"\r\n",				true),
+	CommandStructure(PING,				false,	"PNG",	"\r\n",				true),
 	CommandStructure(PING_RESPONSE,		true,	"QNG ",	"\r\n",				true),
-	CommandStructure(INVITE,		false,	"RNG ",	"\r\n",				false),
+	CommandStructure(INVITE,			false,	"RNG ",	"\r\n",				false),
+	CommandStructure(ILN,				true,	"ILN ",	".*",				true),
 	CommandStructure(UNSUPPORTED,		false,	NULL,	NULL,				false),
 };
 

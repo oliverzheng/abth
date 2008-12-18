@@ -28,6 +28,7 @@ public:
 		PING,			/* Client -> NS */
 		PING_RESPONSE,		/* NS -> Client */
 		INVITE,			/* NS -> Client */
+		ILN,
 		UNSUPPORTED
 	} ECommandType;
 
