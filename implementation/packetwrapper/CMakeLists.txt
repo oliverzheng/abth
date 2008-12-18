@@ -49,14 +49,24 @@ LINK_DIRECTORIES (${PCAP_LIB_DIRECTORY})
 #############################
 
 ADD_LIBRARY (packetwrapper STATIC
+	exceptions.hpp
+    interface.hpp
 	interface.cpp
+    interfaceaddress.hpp
 	interfaceaddress.cpp
+    interfaceapp.hpp
 	interfaceapp.cpp
+    ipaddress.hpp
 	ipaddress.cpp
+    networkheaders.hpp
+    packetinjector.hpp
 	packetinjector.cpp
 	packetobservable.cpp
+    packetobservable.hpp
 	packetobserver.cpp
+    packetobserver.hpp
 	tcppacket.cpp
+    tcppacket.hpp
 )
 TARGET_LINK_LIBRARIES (packetwrapper ${Boost_LIBRARIES} ${PCAP_LIB_DEPENDENCY})
 
