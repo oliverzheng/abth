@@ -82,6 +82,6 @@ private:
 
 }; /* class MSNPPacket */
 
-} /* namespace msnpabth */
+} /* namespace msnp */
 
 #endif /* MSNP_PACKET_HPP */
