@@ -22,13 +22,13 @@ public:
 	 * - PING_RESPONSE
 	 */
 	typedef enum ECommandType {
-		CHALLENGE,		/* NS -> Client */
+		CHALLENGE,			/* NS -> Client */
 		CHALLENGE_RESPONSE,	/* Client -> NS */
 		CHALLENGE_RETURN,	/* NS -> Client */
-		PING,			/* Client -> NS */
+		PING,				/* Client -> NS */
 		PING_RESPONSE,		/* NS -> Client */
-		INVITE,			/* NS -> Client */
-		ILN,
+		INVITE,				/* NS -> Client */
+		ILN,				/* NS -> Client */
 		UNSUPPORTED
 	} ECommandType;
 
