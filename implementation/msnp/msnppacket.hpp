@@ -28,7 +28,11 @@ public:
 		PING,				/* Client -> NS */
 		PING_RESPONSE,		/* NS -> Client */
 		INVITE,				/* NS -> Client */
-		ILN,				/* NS -> Client */
+		INIT_CONTACT_LIST,	/* ILN:		NS -> Client */
+		STATUS_CHANGE,		/* NLN:		NS -> Client */
+		PERSONAL_MSG,		/* UBX:		NS -> Client */
+		CONTACT_SIGN_OUT,	/* FLN:		NS -> Client */
+		SIGN_OUT,
 		UNSUPPORTED
 	} ECommandType;
 
