@@ -43,6 +43,13 @@ public:
 
 }; /* class TransactionIDNotSetException */
 
+class EmailNotSetException : public MSNPABTHException
+{
+public:
+	EmailNotSetException() : MSNPABTHException() {};
+	virtual ~EmailNotSetException() throw() {};
+
+}; /* class EmailNotSetException */
 
 class IllegalCommandException : public MSNPABTHException
 {

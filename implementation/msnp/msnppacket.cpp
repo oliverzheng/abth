@@ -22,8 +22,8 @@ MSNPPacket::CommandStructure MSNPPacket::commandStructures[] =
 	CommandStructure(PING_RESPONSE,		true,	"QNG ",	"\r\n",					true),
 	CommandStructure(INVITE,			false,	"RNG ",	"\r\n",					false),
 	CommandStructure(INIT_CONTACT_LIST,	true,	"ILN ",	".*",					true),
-	CommandStructure(STATUS_CHANGE,		false,	"NLN ",	"\[A-Z]{3} \\S+ .*",	true),
-	CommandStructure(PERSONAL_MSG,		false,	"UBX ",	"\\S+ \\d+ \\d+\r\n.*",true),
+	CommandStructure(STATUS_CHANGE,		false,	"NLN ",	"\[A-Z]{3} (\\S+) \\d+ \\S+ .*",	true),
+	CommandStructure(PERSONAL_MSG,		false,	"UBX ",	"(\\S+) \\d+ \\d{2,}\r\n.*",true),
 	CommandStructure(CONTACT_SIGN_OUT,	false,	"FLN ",	"\\S+ \\d+ \\d+ \r\n",	true),
 	CommandStructure(SIGN_OUT,			false,	"OUT ",	"\r\n",					true),
 	CommandStructure(UNSUPPORTED,		false,	NULL,	NULL,					false),
@@ -51,11 +51,13 @@ MSNPPacket::CommandStructure::~CommandStructure()
 MSNPPacket::MSNPPacket()
 	: command(UNSUPPORTED), commandSet(false), transactionID(-1)
 {
+	email.clear();
 }
 
 MSNPPacket::MSNPPacket(TCPPacket & tcpPacket)
 	: TCPPacket(tcpPacket), command(UNSUPPORTED), commandSet(false), transactionID(-1)
 {
+	email.clear();
 	parse();
 }
 
@@ -126,6 +128,14 @@ int MSNPPacket::getTransactionID() const throw(TransactionIDNotSetException)
 	return transactionID;
 }
 
+string MSNPPacket::getEmail() const throw(EmailNotSetException)
+{
+	if (email.empty())
+		throw EmailNotSetException();
+
+	return email;
+}
+
 void MSNPPacket::parse()
 {
 	command = UNSUPPORTED;
@@ -151,6 +161,12 @@ void MSNPPacket::parse()
 
 			if (commandStructure->transactionID)
 				transactionID = atoi(string(match[1].first, match[1].second).c_str());
+			
+			switch( commandStructure->command ) {
+				case STATUS_CHANGE:
+				case PERSONAL_MSG:
+					email.assign(string(match[1].first, match[1].second).c_str());
+			}
 	}
 }
 
