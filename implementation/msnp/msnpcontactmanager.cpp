@@ -19,28 +19,46 @@ void MSNPContactManager::ParsePacket( MSNPPacket msnpPacket )
 {
 	static int initialTrId = 0;
 	static bool ilnRx = false;
-	
+	static MSNPPacket::ECommandType prevPacket = MSNPPacket::UNSUPPORTED;
+	static std::string statusChangeEmail;
+	static std::string prevContactEmail;
+
 	switch( msnpPacket.getCommand() ) {
-		case MSNPPacket::ILN:
-		{
-			// initial sign-in
-			int trId = msnpPacket.getTransactionID();
+		case MSNPPacket::INIT_CONTACT_LIST:
 			ilnRx = true;
+			if (initialTrId == 0) initialTrId = msnpPacket.getTransactionID();
+			break;
+		case MSNPPacket::STATUS_CHANGE:
+			if ( msnpPacket.getStatusCode().compare("IDL") == 0 ) {
+				statusChangeEmail.clear();
+			} else {
+				statusChangeEmail = msnpPacket.getEmail();
+			}
+			break;
+		case MSNPPacket::PERSONAL_MSG:
+			{
+				std::string curEmail = msnpPacket.getEmail();
 
-			if (initialTrId == 0) initialTrId = trId;
+				if ( prevPacket == MSNPPacket::STATUS_CHANGE && 
+					statusChangeEmail.compare(curEmail) == 0) {
+						if ( prevContactEmail.compare(curEmail) != 0 ) {
+							prevContactEmail = curEmail;
+							numOnline++;
+						}
+				}
+			}
+			break;
+		case MSNPPacket::CONTACT_SIGN_OUT:
+			if ( prevContactEmail.compare(msnpPacket.getEmail()) == 0 )
+				prevContactEmail.clear();
 
+			numOnline--;
 			break;
-		}
-/*
-		case MSNPPacket::NLN:
-		case MSNPPacket::UBX:
-			// contact list modify
+		case MSNPPacket::SIGN_OUT:
+			numOnline = 0;
 			break;
-		case MSNPPacket::OUT:
-			// contact sign out
-			break;
-*/
 		default:
+			statusChangeEmail.clear();
 			break;
 	}
 
@@ -54,9 +72,12 @@ void MSNPContactManager::ParsePacket( MSNPPacket msnpPacket )
 		if ( currentTrId == initialTrId || currentTrId == 0 ) {
 			InitialSignIn(msnpPacket);
 		} else {
+			initialTrId = 0;
+			ilnRx = false;
 		}
-
 	}
+
+	prevPacket = msnpPacket.getCommand();
 }
 
 void MSNPContactManager::InitialSignIn( MSNPPacket msnpPacket ) {

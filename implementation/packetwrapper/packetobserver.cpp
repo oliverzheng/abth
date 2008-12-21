@@ -99,11 +99,12 @@ void PacketObserver::loop()
 
 	while (running)
 		if ((packetData = pcap_next(pcapHandle, &packetHeader)) != NULL) {
+			/*
 			debug("Captured packet at %u %6u: packet length = %u",
 			      (unsigned int)packetHeader.ts.tv_sec,
 			      (unsigned int)packetHeader.ts.tv_usec,
 			      (unsigned int)packetHeader.len);
-
+*/
 			TCPPacket tcpPacket;
 			tcpPacket.parse(packetData, packetHeader.caplen);
 
