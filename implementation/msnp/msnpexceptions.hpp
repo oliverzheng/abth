@@ -51,6 +51,14 @@ public:
 
 }; /* class EmailNotSetException */
 
+class StatusCodeNotSetException : public MSNPABTHException
+{
+public:
+	StatusCodeNotSetException() : MSNPABTHException() {};
+	virtual ~StatusCodeNotSetException() throw() {};
+
+}; /* class StatusCodeNotSetException */
+
 class IllegalCommandException : public MSNPABTHException
 {
 public:

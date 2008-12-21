@@ -52,6 +52,7 @@ public:
 	ECommandType getCommand() const throw(CommandNotSetException);
 	int getTransactionID() const throw(TransactionIDNotSetException);
 	std::string getEmail() const throw(EmailNotSetException);
+	std::string getStatusCode() const throw (StatusCodeNotSetException);
 
 private:
 	/* Parse raw TCP data into an MSNP packet */
@@ -62,6 +63,7 @@ private:
 
 	int transactionID;
 	std::string email;
+	std::string statusCode;
 
 	static std::string transactionIDRegex;
 
