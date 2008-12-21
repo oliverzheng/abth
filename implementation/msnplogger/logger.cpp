@@ -13,7 +13,7 @@ using namespace msnp;
 using namespace packetwrapper;
 
 Logger::Timer::Timer(time_duration duration)
-    : logDuration(duration)
+	: logDuration(duration)
 {
 	resetTimer();
 }

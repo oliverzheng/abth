@@ -43,7 +43,7 @@ public:
 	const InterfaceAddress addresses;
 
 private:
-	/* Prevent user from  creating interfaces */
+	/* Prevent user from creating interfaces */
 	Interface(std::string name,
 	          std::string description,
 	          InterfaceAddress addresses);

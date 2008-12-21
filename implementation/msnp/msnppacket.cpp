@@ -16,13 +16,13 @@ string MSNPPacket::transactionIDRegex("(\\d+)");
 MSNPPacket::CommandStructure MSNPPacket::commandStructures[] =
 {
 	CommandStructure(CHALLENGE,			false,	"CHL ",	"0 29875966221179296547\r\n",	false),
-	CommandStructure(CHALLENGE_RESPONSE,true,	"QRY ",	" \\S+ \\d+\r\n\\w+",	true),
+	CommandStructure(CHALLENGE_RESPONSE,	true,	"QRY ",	" \\S+ \\d+\r\n\\w+",	true),
 	CommandStructure(CHALLENGE_RETURN,	true,	"QRY ",	"\r\n",					true),
 	CommandStructure(PING,				false,	"PNG",	"\r\n",					true),
 	CommandStructure(PING_RESPONSE,		true,	"QNG ",	"\r\n",					true),
 	CommandStructure(INVITE,			false,	"RNG ",	"\r\n",					false),
 	CommandStructure(INIT_CONTACT_LIST,	true,	"ILN ",	".*",					true),
-	CommandStructure(STATUS_CHANGE,		false,	"NLN ",	"(\[A-Z]{3}) (\\S+) \\d+ \\S+ .*",	true),
+	CommandStructure(STATUS_CHANGE,		false,	"NLN ",	"([A-Z]{3}) (\\S+) \\d+ \\S+ .*",	true),
 	CommandStructure(PERSONAL_MSG,		false,	"UBX ",	"(\\S+) \\d+ \\d+\r\n.*",true),
 	CommandStructure(CONTACT_SIGN_OUT,	false,	"FLN ",	"(\\S+) \\d+ \\d+ \r\n",	true),
 	CommandStructure(SIGN_OUT,			false,	"OUT ",	"\r\n",					true),
@@ -180,6 +180,8 @@ void MSNPPacket::parse()
 				case PERSONAL_MSG:
 				case CONTACT_SIGN_OUT:
 					email.assign(string(match[1].first, match[1].second).c_str());
+				default:
+					break;
 			}
 	}
 }

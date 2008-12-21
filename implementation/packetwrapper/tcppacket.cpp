@@ -217,7 +217,7 @@ unsigned char * TCPPacket::construct()
 
 	tcpChecksum += ((unsigned short) ipHeader->PROTOCOL_TCP) + (tcpLength);
 
-    	while (tcpChecksum >> 16)
+	while (tcpChecksum >> 16)
 		tcpChecksum = (tcpChecksum & 0xFFFF) + (tcpChecksum >> 16);
 		
 	tcpChecksum = ~(tcpChecksum & 0xFFFF);

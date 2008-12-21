@@ -85,10 +85,10 @@ void MSNPContactManager::InitialSignIn( MSNPPacket msnpPacket ) {
 
 	std::string dataString((const char *) msnpPacket.data, msnpPacket.dataLength);
 
-    sregex_token_iterator cur( dataString.begin(), dataString.end(), re );
-    sregex_token_iterator end;
+	sregex_token_iterator cur( dataString.begin(), dataString.end(), re );
+	sregex_token_iterator end;
 
-    for( ; cur != end; ++cur )
+	for( ; cur != end; ++cur )
 		numOnline++;
 }
 
