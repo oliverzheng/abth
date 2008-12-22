@@ -17,9 +17,11 @@ SET (Boost_USE_STATIC_LIBS ON)
 SET (Boost_USE_MULTITHREAD ON)
 SET (Boost_ADDITIONAL_VERSIONS "1.37")
 FIND_PACKAGE (Boost REQUIRED COMPONENTS
+	system
 	date_time
 	thread
 	regex
+	filesystem
 )
 
 IF (Boost_FOUND)

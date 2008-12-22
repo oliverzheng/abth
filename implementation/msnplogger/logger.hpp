@@ -8,6 +8,8 @@
 #include <packetwrapper/packetobservable.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <boost/filesystem/fstream.hpp>
+
 /* An implementation of PacketObservable.
  * Logs an averaged frequency of packets received for a given client.
  */

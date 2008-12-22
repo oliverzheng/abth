@@ -9,6 +9,7 @@
 using namespace logger;
 using namespace boost;
 using namespace boost::posix_time;
+using namespace boost::filesystem;
 using namespace msnp;
 using namespace packetwrapper;
 
@@ -73,11 +74,15 @@ void Logger::Log (std::string msg)
 {
 	static unsigned int cnt = 1;
 	ptime curTime = second_clock::local_time();
+	
+	ofstream logFile( "log.txt", ofstream::app);
 
-	std::cout << cnt++ << "\t" << 
+	logFile << cnt++ << "\t" <<
 		curTime.date() << "\t" <<
 		curTime.time_of_day() << "\t" << 
 		contactManager->GetNumOnline() << "\t" <<
 		msg << "\t" <<
-		std::endl;
+		"\n";
+
+	logFile.close();
 }
