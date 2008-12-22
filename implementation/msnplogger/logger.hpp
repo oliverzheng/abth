@@ -25,7 +25,7 @@ private:
 	int numContacts;
 	msnp::MSNPContactManager * contactManager;
 
-	void Log (std::string msg) ;
+	void Log (std::string msg);
 
 	class Timer 
 	{
@@ -40,6 +40,7 @@ private:
 		boost::posix_time::time_duration logDuration;
 	}; /* class Timer */
 
+	packetwrapper::IPAddress nsIP;
 	Timer * timer;
 }; /* class Logger */
 

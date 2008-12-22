@@ -51,16 +51,19 @@ void Logger::packetReceived(TCPPacket & tcpPacket)
 
 	static bool start = false;
 	if ( start ) {
-		if ( timer->isTimerExpired() ) {
-			Log("good");
-		} else {
-			Log("abth gone awry");
-		}
+		if ( msnpPacket.srcIP == nsIP || msnpPacket.dstIP == nsIP ) {
+			if ( timer->isTimerExpired() ) {
+				Log("good");
+			} else {
+				Log("abth gone awry");
+			}
 
-		start = false;
+			start = false;
+		}
 	}
 	
 	if ( msnpPacket.getCommand() == msnpPacket.PING_RESPONSE ) {
+		nsIP = msnpPacket.srcIP;
 		timer->resetTimer();
 		start = true;
 	}
