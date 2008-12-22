@@ -19,14 +19,19 @@ class MSNPContactManager
 public:
 	MSNPContactManager();
 	
+	/* Parse the packet to determine whether it affects the contact list */
 	void ParsePacket( MSNPPacket msnpPacket );
 
+	/* Retrieves the number of contacts currently online */
 	int GetNumOnline();
 
 private:
-	void InitialSignIn( MSNPPacket msnpPacket );
+	void InitialSignIn( const MSNPPacket msnpPacket );
 
-	int numOnline;
+	/* if the email is found within the contact list, the index is returned, else -1 is returned */
+	int SearchOnlineContactList( const std::string email );
+
+	std::vector<std::string> *onlineContactList;
 }; /* class MSNPContacts */
 
 } /* namespace msnp */
