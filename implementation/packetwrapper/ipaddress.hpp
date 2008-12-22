@@ -23,6 +23,7 @@ public:
 	IPAddress();
 
 	IPAddress & operator=(const IPAddress & other);
+	bool operator==(const IPAddress& other) const;
 
 	/* Retrieve IP as string. Empty string denotes it has not been set. */
 	std::string get() const;

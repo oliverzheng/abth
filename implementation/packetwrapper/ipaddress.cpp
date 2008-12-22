@@ -31,6 +31,14 @@ IPAddress & IPAddress::operator=(const IPAddress & other)
 	return *this;
 }
 
+bool IPAddress::operator==(const IPAddress& other) const {
+	if ( this->ipAddress.compare( other.ipAddress ) == 0 ) {
+		return true;
+	}
+
+	return false;
+}
+
 string IPAddress::get() const
 {
 	return ipAddress;
