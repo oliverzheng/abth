@@ -13,12 +13,11 @@ MSNPContactManager::MSNPContactManager()
 
 void MSNPContactManager::ParsePacket( MSNPPacket msnpPacket )
 {
-	static int initialTrId = 0;
+	static bool ilnRx = false;
 
 	switch( msnpPacket.getCommand() ) {
 		case MSNPPacket::INIT_CONTACT_LIST:
 			ilnRx = true;
-			if (initialTrId == 0) initialTrId = msnpPacket.getTransactionID();
 			break;
 		case MSNPPacket::STATUS_CHANGE:
 			{
@@ -42,24 +41,10 @@ void MSNPContactManager::ParsePacket( MSNPPacket msnpPacket )
 			break;
 	}
 
-	if ( initialTrId != 0 ) {
-		int currentTrId = 0;
-		try {
-			currentTrId = msnpPacket.getTransactionID();
-		} catch ( TransactionIDNotSetException e ) {
-		}
-
-		if ( currentTrId == initialTrId || currentTrId == 0 ) {
-			InitialSignIn(msnpPacket);
-		} else {
-			initialTrId = 0;
-		}
-	}
+	if ( ilnRx ) ParseForILN(msnpPacket);
 }
 
-
-
-void MSNPContactManager::InitialSignIn( const MSNPPacket msnpPacket ) {
+void MSNPContactManager::ParseForILN( const MSNPPacket msnpPacket ) {
 	const regex expression("ILN \\d+ [A-Z]{3} (\\S+) \\d+");
 
 	string dataString((const char *) msnpPacket.data, msnpPacket.dataLength);
@@ -76,7 +61,7 @@ void MSNPContactManager::InitialSignIn( const MSNPPacket msnpPacket ) {
 	}
 }
 
-int MSNPContactManager::SearchOnlineContactList( const std::string email ) {
+int MSNPContactManager::SearchOnlineContactList( const string email ) {
 	for( unsigned int i=0; i < onlineContactList->size(); i++)
 	{
 		if ( onlineContactList->at(i).compare(email) == 0 ) {

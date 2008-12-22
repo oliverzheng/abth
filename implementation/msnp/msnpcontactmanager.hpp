@@ -26,7 +26,7 @@ public:
 	int GetNumOnline();
 
 private:
-	void InitialSignIn( const MSNPPacket msnpPacket );
+	void ParseForILN( const MSNPPacket msnpPacket );
 
 	/* if the email is found within the contact list, the index is returned, else -1 is returned */
 	int SearchOnlineContactList( const std::string email );
