@@ -13,7 +13,7 @@
 % --- End Metadata ---
 
 \title{
-Application-based TCP Hijacking
+Application-Based TCP Hijacking
 }
 \subtitle{Case Study on Windows Live Messenger}
 
@@ -45,11 +45,13 @@ We present Application-Based TCP Hijacking (ABTH), a technique that exploits fla
 \section{Introduction}
 
 Since its first specification in 1974 \cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET.
-The security properties of these application protocols partially depend on the security of TCP and the underlying Internet Protocol (IP). Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design \cite{harris:tcpattacks}.
+The security properties of these application protocols partially depend on the security of TCP and the underlying Internet Protocol (IP).
+Even though TCP does not offer authentication, confidentiality, or integrity, application protocols that employ TCP are expected to offer a reasonable level of security.
+Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design \cite{harris:tcpattacks}.
 While preventive mechanisms have been developed to throttle or even eliminate most of these attacks \cite{dubrawsky:layer2}, the last item on the list of TCP vulnerabilities is yet to be written.
 
 In this paper, we present and suggest countermeasures for a new way of attacking a TCP-based communication.
-Our technique is similar to TCP hijacking \cite{stamp:infosec} but dwells on application-layer protocols.
+Our technique extends TCP hijacking \cite{stamp:infosec} by meddling with application-layer protocols.
 Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers.
 However, the majority of these attacks have been circumvented through the use of hardware switches and routers \cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks.
 On the other hand, Application-Based TCP Hijacking (ABTH), the exploit method presented in this paper, utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.
@@ -65,14 +67,13 @@ Such an attack could result in at minimum user inconveniences or embarrassment b
 
 Even though the reported case study is limited to WLM, we believe that due to its generic nature, Application-Based TCP Hijacking can be mounted on a variety of application protocols.
 
-To effectively prevent ABTH, application protocols could encrypt packets and thus put off TCP security exploits.
-Application developers 2 no doubt would need time to redesign their applications in order to deploy these changes.
-In the meantime, Internet service providers (ISPs) could employ stricter security controls on the network layer.
+Among several ways to circumvent ABTH, application protocols could encrypt packets and thus put off TCP security exploits.
+Internet service providers (ISPs) could employ stricter security controls on the network layer.
 
 The remainder of the paper is organized as follows.
-Existing attacks on TCP and related work are discussed in Section 2.
+Relevant TCP information and Existing attacks on TCP are discussed in Section 2.
 The theory and general operation of ABTH is discussed in Section 3.
-The feasibility of ABTH on MSNP to spoof a command and impersonate a contact is demonstrated in Section 4.
+The applicability of ABTH on MSNP to spoof a command and impersonate a contact is demonstrated in Section 4.
 The limitations of ABTH and countermeasures against it are discussed in Section 5.
 The paper is concluded in Section 6.
 
@@ -123,7 +124,7 @@ Both host would notice a disruption in network service and may suspect an attack
 
 \subsubsection{Man-in-the-Middle}
 
-Following a TCP hijacking attack, the attacker can act as the man-in-the-middle, by relaying all messages from one host to the other \cite{joncheray:simpleattack, greg:stackhack}.
+Following a TCP hijacking attack, the attacker can act as the man-in-the-middle, by relaying all messages from one host to the other \cite{joncheray:simpleattack, gregg:stackhack}.
 Each host would receive acknowledgement for every sent packet, since the attacker is injecting a spoofed packet for each packet sent by translating seqnums and acknums on the fly.
 However, a problem arises when each host receives the original packets sent by each other.
 As previously mentioned, a packet is considered valid if its seqnum falls within the range of the expected seqnum and the rcvwnd.
@@ -295,36 +296,55 @@ We could now send any messages to the victim through this spoofed connection and
 Our experiments demonstrate that MSNP could be successfully attacked by employing ABTH.
 The technique, however, has several caveats.
 
-A limitation of ABTH is that the number of pings to send to the client and the server are calculated prior to the restoration phase and are therefore static.
-If unexpected packets were sent and received to the server and/or client during the restoration phase, this would result in ABTH to fail in re-synchronizing the TCP stacks of the client and the server.
-As a result, no unexpected network traffic can occur while ABTH is in the process of sending its own packets.
-This limitation of ABTH can be fixed through the introduction of more complex algorithms capable of making adjustments dynamically.
+\subsection{Limitations}
 
-As ABTH relies on the ability to inject packets that lack authenticity and integrity protection, one countermeasure to circumvent ABTH attacks is to protect application traffic cryptographically.
-As a case in point, SimpLite-MSN \cite{secway:url}, according to its marketing description, sets up RSA keys and encrypts all IM traffic for MSNP, providing protection against spoofing.
+ABTH requires the length of responses be greater than the commands issued to provoke them.
+If this was not the case, resynchronization would only widen the gap of mismatched seqnums.
+Similarly, application commands with similar behaviour to NOP (no operation) that do not require responses would not work either.
 
-Another defence against ABTH could possibly be intrusion detection logic built into the application.
-A possible approach would be to limit the number of pings per one unit of time, and thus limiting the attacker’s ability to impair the application.
-However, such a mechanism could possibly be evaded, as the methods of ABTH could adapt.
-Also, such a restriction on the usage of the protocol would hinder application development.
+Our implementation of ABTH on the MSNP protocol calculates and generates the required commands to send prior to the attack and are therefore static.
+If either host sends packets during the restoration phase, this would result in ABTH to fail in resynchronizing their TCP stacks.
+As a result, no network traffic can occur while ABTH is in the process of sending its own packets.
+Complex algorithms capable of adjusting to live traffic dynamically may improve this performance.
 
-ABTH reveals the inherent flaw in network protocols that all packets are sent transparently on a shared channel that attackers have access to.
-Although it is impractical to isolate communication channels for specific applications using hardware, cryptographic isolation should be considered.
-Even if packets are sent in plain text, a simple regulatory mechanism of the protocol should present mutual authentication with each message, such as sequence numbers for the application-level protocol messages.
+\subsection{Countermeasures}
+
+A straight-forward countermeasure against ABTH is to encrypt all application traffic with SSL/TLS to authenticate messages.
+However, large-scale applications such as MSNP would require substantial server resources in encrypting all network traffic.
+
+Some applications may connect peers to peers, as MSNP does implicitly by allowing a communication channel between two clients.
+In such cases, clients may encrypt traffic and authenticate each other through the channel provided by the application.
+As a case in point, SimpLite-MSN \cite{secway:url}, according to its marketing description, sets up RSA keys and authenticates all instant messaging traffic for MSNP, providing protection against spoofing.
+
+Intrusion detection systems (IDS) may possibily detect ABTH given a well characterized behaviour of attacks.
+Since ABTH utilizes minimal resources and is limited to the specification of TCP and the application, the behaviour would need to be described precisely, which may or may not be feasible as it may step within boundaries of legitimate application traffic.
+
+Even if packets are sent in plain text, a simple regulatory mechanism of the application protocol could present some integrity with each message, such as tagging application messages with sequence numbers.
 It would be difficult to inject a packet and expect further messages to be accepted since the application also keeps track of the list of messages.
 This straightforward yet non-trivial detail also alleviates the application protocol from its dependence on the network layer and the assumption that packets on the network layer are authentic.
 
+For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network \cite{templeton:spoof}.
+However, this method would not ineffective in a wireless medium, such as WiFi.
+Of course, WiFi traffic could be encrypted to circumvent ABTH.
+
+\subsection{Feasibility}
+
+Our particular implementation of ABTH on MSNP completes within roughly 2 seconds.
+It can be launched on the trigger of capturing an MSNP ping packet.
+In our findings, the probability of network traffic occurring within 2 seconds of a ping is less than 5\%, as logged by several days of network traffic.
+As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
+
+In environments that provide a common physical communication medium, ABTH may present a threat.
+Examples include hubbed networks, coffee shops that offer WiFi service, and increasingly popular virtualized servers.
 Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
 It is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
-On the other hand, the initial design of the protocol should be given consideration of various future uses to provide backward compatibility in case a need for modifications arises.
-
-For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network \cite{templeton:spoof}.
 
 \section{Conclusion}
 
-In this paper, we introduced Application-Based TCP session Hijacking (ABTH).
+In this paper, we introduced Application-Based TCP Hijacking (ABTH).
 By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, ABTH offers an elegant way of exploiting certain application protocols.
-We presented a proof of ABTH concept by successfully experimenting with two sample attacks on Windows Live Messenger, Microsoft’s popular instant messaging application, which runs over Microsoft Notification Protocol (MSNP).
+By sending commands to both hosts to provoke responses, an attacker can create a gap of a certain size in TCP sequence numbers to inject a malicious command.
+We presented a proof of ABTH concept by successfully experimenting with two sample attacks on Windows Live Messenger, Microsoft's popular instant messaging application, which runs over Microsoft Notification Protocol (MSNP).
 
 While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities.
 Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
