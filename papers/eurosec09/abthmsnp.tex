@@ -45,13 +45,16 @@ We present Application-Based TCP Hijacking (ABTH), a technique that exploits fla
 \section{Introduction}
 
 Since its first specification in 1974 \cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET.
-<<<<<<< HEAD:papers/eurosec09/abthmsnp.tex
 The security properties of these application protocols are partially dependent on the security of TCP and the underlying Internet Protocol (IP). Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design \cite{harris:tcpattacks}.
-=======
+
 The security properties of these application protocols partially depend on the security of TCP and the underlying Internet Protocol (IP).
 Even though TCP does not offer authentication, confidentiality, or integrity, application protocols that employ TCP are expected to offer a reasonable level of security.
 Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design \cite{harris:tcpattacks}.
->>>>>>> 82956c3e0448e710d3978e5044a471690fa10f88:papers/eurosec09/abthmsnp.tex
+
+The security properties of these application protocols partially depend on the security of TCP and the underlying Internet Protocol (IP).
+Even though TCP does not offer authentication, confidentiality, or integrity, application protocols that employ TCP are expected to offer a reasonable level of security.
+Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design \cite{harris:tcpattacks}.
+
 While preventive mechanisms have been developed to throttle or even eliminate most of these attacks \cite{dubrawsky:layer2}, the last item on the list of TCP vulnerabilities is yet to be written.
 
 In this paper, we present and suggest countermeasures for a new way of attacking a TCP-based communication.
@@ -281,9 +284,6 @@ The technique, however, has several caveats.
 In cases such as this, it is crucial that ABTH is completed prior to the next client ping, which occurs in roughly 45 seconds.
 Otherwise, the client would repeatedly ping the NS and very quickly timeout before more packets could be sent to fix the imbalance in the sequence numbers.
 Depending on the resources of the attacker, this attack can be reasonably accomplished within this timeframe, as our experiments demonstrated.
-
-As ABTH relies on the ability to inject packets that lack authenticity and integrity protection, one countermeasure to circumvent ABTH attacks is to protect application traffic cryptographically.
-As a case in point, SimpLite-MSN \cite{secway:url}, according to its marketing description, sets up RSA keys and encrypts all IM traffic for MSNP, providing protection against spoofing.
 
 ABTH requires the length of responses be greater than the commands issued to provoke them.
 If this was not the case, resynchronization would only widen the gap of mismatched seqnums.
