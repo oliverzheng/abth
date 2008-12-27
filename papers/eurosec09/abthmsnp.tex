@@ -4,6 +4,10 @@
 
 \documentclass{sig-alternate}
 
+% Drawing utilities
+\input xy
+\xyoption{all}
+
 \begin{document}
 
 % --- Metadata ---
@@ -187,155 +191,132 @@ The significance of ABTH provides the attacker an exit strategy in which the att
 
 To demonstrate the feasibility and effectiveness of ABTH, we next describe our experience with employing our attack to compromise Windows Live Messenger.
 
-\section{Case Study: Attacking Windows Live Messenger with ABTH} First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services. WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service \cite{piccard:imsecurity}.
+\section{Case Study: Attacking Windows Live Messenger with ABTH}
+
+First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services. WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service \cite{piccard:imsecurity}.
 
 \subsection{.NET Messenger Service}
 
 The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication. The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers \cite{torre:wlm}.
 
 When a user logs into their WLM account, a persistent TCP connection to the NS is opened. This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service. 
-Using this connection between the NS and the WLM client information regarding a user’s contact list and presence information (e.g. user status, email notification) are synchronized. The NS also act to setup connections to mixer servers.
-Mixer servers handle all IM sessions between clients. 
+This connection is used to transmit information regarding a user's contact list and presence information (e.g. user status, email notification).
+The NS also setups sends information regarding mixer servers, which relays all IM sessions between clients. 
 
 \begin{figure}[h]
-\centering
-\includegraphics[width=\columnwidth]{figures/net_infrastructure}
-\caption{.NET Messenger Service Infrastructure}
-\label{fig:.NET Messenger Service Infrastructure}
+	\centering
+	\caption{.NET Messenger Service Infrastructure}
+	\label{fig:wlminfrastructure}
+	\xymatrix {
+		\framebox{Notification Server} \ar@{<->}[d] & \framebox{Notification Server} \ar@{<->}[d] \\
+		\framebox{WLM Client 1} \ar@{<->}[d] & \framebox{WLM Client 2} \ar@{<->}[ld] \\
+		\framebox{Mixer Server} & \\
+	}
 \end{figure}
 
 \subsection{Microsoft Notification Protocol}
 
-MSNP is a text-based application protocol used for communication between WLM clients and the .NET Messenger Service.
+MSNP is a text-based application protocol used for communication between WLM clients and servers.
 Although the protocol was first intended to be an open standard \cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
 However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful \cite{hypothetic:msnp, msnfanatic:msnp}.
 
-The protocol consists of a series of UTF-8 and URL/XML encoded commands; each MSNP command is represented by three capital letters (e.g., command PNG represents ping).
+The protocol consists of plain text commands; each MSNP command is prefixed with three capital letters (e.g., command PNG represents ping).
 
-\begin{table*}[tbh!]
-\centering
-\includegraphics{figures/msnpcommands}
-\caption{MSNP Commands}
-\label{fig:MSNP Commands}
+\begin{table*}[tbp]
+	\centering
+
+	\caption {MSNP Commands}
+	\label{tab:commandlist}
+
+	\begin{tabular}{llr}
+		\hline
+		\hline
+		\textbf{Command} & \textbf{Description} & \textbf{Size} \\
+		\hline
+		\texttt{PNG$\backslash$r$\backslash$n} & Client command to ping the NS. & 5 \\
+		\texttt{QNG [2]$\backslash$r$\backslash$n} & NS's response to PNG. & 8 \\
+		\texttt{CHL [22]$\backslash$r$\backslash$n} & NS command to ping the client. & 28 \\
+		\texttt{QRY [24]$\backslash$r$\backslash$n[32]} & Client's response to CHL. & 60 \\
+		\texttt{QRY [2]$\backslash$r$\backslash$n} & NS's response to client's QRY. & 8 \\
+		\texttt{RNG [10] [ip:port] [19] [email] [name] [21] $\backslash$r$\backslash$n[ws]} & NS's invite to the client for new IM session. & 120 \\
+		\hline
+	\end{tabular}
+
+	\begin{flushleft}
+	Irrelevant parts of commands are denoted using the following notation:
+	\begin{itemize}
+		\item {[\#]} is an integer or string of n characters wide;
+		\item {[ip:port]} is the IP address and TCP port of the mixer server;
+		\item {[email]} is the email address of the user to be impersonated;
+		\item {[name]} is the name of the user to be impersonated;
+		\item {[ws]} is a variable length of whitespace padded to the command by the attacker.
+	\end{itemize}
+	\end{flushleft}
+
 \end{table*}
 
-In order to determine the validity of a persistent connection between the NS and the client, MSNP allows for asynchronous bi-directional pings; both the WLM client and the NS have the ability to initiate a ping.
-Pings from the client to the NS are achieved through the PNG command; the NS uses the CHL command to ping the client.
-If the receiver of the ping does not respond within a predetermined time slot, disconnection from the messaging service typically follows. The time slot varies between the various IM applications. For example, in WLM, the official MSNP IM application, the client pings the NS approximately every 45 seconds whereas in alternative IM applications such as Pidgin \cite{pidgin:url}, the pings occur approximately every minute.
+To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bi-directional pings; both the WLM client and the NS have the ability to initiate a ping.
+The client pings the NS with PNG; the NS pings the client with CHL.
+Both pings provoke responses, which must be sent to prevent disconnection from the messaging service.
+WLM, the official MSNP IM application, pings the NS every 45 seconds whereas in alternative IM clients such as Pidgin \cite{pidgin:url}, ping the NS every 30 seconds.
+Table \ref{tab:commandlist} specifies the structure of those MSNP commands that are relevant to our ABTH attack on MSNP.
 Note that the ping-response initiated by the NS entails three transactions (CHL-QRY-QRY).
-Table 1 specifies the structure of those MSNP commands that are relevant to our ABTH-based attack on the WLM.
 
-Within this timeframe, ABTH can exploit these two sets of ping-response commands to eliminate the discrepancy between the sequence and ack numbers of the client and the NS TCP stacks created by the injection of a TCP packet. In doing so, an attacker has the capability of injecting any number of spoofed MSNP commands without disconnecting the underlying TCP session.
-Although some MSNP commands require a pseudo-random number or hash value (e.g., challenge string, MD5 fingerprint), these values do not have to be correct for the purpose of mounting an ABTH attack. Furthermore, MSNP commands are terminated by carriage return ($\backslash$r$\backslash$n or 0x0d0a), which has a size of 2 bytes.
-Due to the MSNP specification’s flexibility with white-space padding, additional white space can be added to the packet following the carriage return. By artificially inflating the packet size, the ABTH calculations are greatly simplified and the number of packets necessary to re-synchronize the TCP connection can be reduced.
+An attacker can inject an MSNP command by listening to the TCP traffic.
+Afterwards, ABTH can exploit these two sets of ping-response commands to eliminate the discrepancy between the seqnums and acknums of the client and the NS created by the spoof packet.
+Completion of ABTH will circumvent disconnection and detection of a spoofed packet.
+MSNP specification's allows whitespace padding after commands.
+This ability to artificially inflate packet simplifies ABTH calculations and reduces the number of packets necessary to resynchronize the TCP connection.
 
-In order to demonstrate the feasibility of ABTH, the follow sections will demonstrate the spoofing of MSNP commands without causing the disconnection of the MSNP connection. Two spoofing attacks will be described: display name spoofing and identity spoofing. Both attacks use the official WLM client as well as the live .NET Messaging Service. In the identity spoofing attack, a rogue WLM mixer server was implemented where the official Microsoft WLM client will connect to.
-
-\subsection{Display Name Spoofing}
-
-By injecting the MSNP command, PRP, an attacker is capable of modifying a victim's display name to an arbitrary string. The structure of PRP is shown in Table 1.
-
-The NS acknowledges the PRP command by responding to the client by sending the received PRP command minus any additional white space that was added in the original PRP.
-The NS will then update the user’s information resulting in presence updates pushed to all of the user's contacts.
-Although all of the user's contacts are notified of the change to the victim's display name, the victim is completely oblivious to the situation and the client will not notice a change to their display name.
-
-Following the injection of the packet, the TCP stacks of the WLM client and the NS can be resynchronized through ABTH.
-For demonstration purposes, the sequence numbers of the client and the NS are assumed to be 100 and 500 prior to the spoofed packet.
-During normal operation, NS ack number should match client sequence number and client ack number should match NS sequence number, as seen in the first row of Table 2.
-
-\begin{table*}[tbh!]
-\centering
-{\small
-\begin{tabular}{|l l l l l l l l|}
-\hline
-\textbf{Command}&\textbf{Direction}&\textbf{From/To}&\textbf{Data Size}&\textbf{Client Seq}&
-\textbf{Client Ack}&\textbf{NS Seq}&\textbf{NS Ack}\\
-\hline
-	\textit{Before Attack:} & & & & 100 & 500 & 500 & 100 \\
-	PRP & Sent to attacker & NS & 24 & 100 & 500 & 500 & \textbf{124} \\
-	PRP & Received by attacker & NS & 20 & 100 & 500 & \textbf{520} & 124 \\
-	\multicolumn{8}{|l|}{\textit{Begin ABTH:}} \\
-	PNG & Sent to attacker & NS & 6 & 100 & 500 & 520 & \textbf{130} \\
-	QNG & Received by attacker & NS & 8 & 100 & 500 & \textbf{528} & 130 \\
-	\multicolumn{8}{|l|}{\textit{Repeat PNG/QNG exchange for 5 more times..}} \\
-	CHL & Sent to attacker & Client & 60 & 100 & \textbf{560} & \textbf{568} & \textbf{160} \\
-	QRY & Received by attacker & Client & 60 & \textbf{160} & 560 & 568 & 160 \\
-	QRY & Sent to attacker & Client & 8 & 160 & \textbf{568} & 568 & 160 \\
-\hline
-\end{tabular}}
-\caption{Display Name Spoofing}
-\label{tb:dispNameSpoofing}
-\end{table*}
-
-While the sequence numbers of the NS or the client cannot be controlled, the ack numbers of both sides can be altered by spoofing a whitespace-padded packet.
-Table 3 shows the amount of padding that used for this example.
-Each command is sent or received by the attacker in the order listed in Table 2.
-
-As the last row of Table 2 shows, with the client's sequence number equal to the NS's ack number, and the NS's sequence number equal to the client's ack number, ABTH has successfully completed its series of application specific commands, and the TCP connection is returned to a synchronized state and is ready to transmit further legitimate and/or illegitimate packets.
-
-\begin{table*}[tbh!]
-{\small
-\hfill{}
-\begin{tabular}{|l l l l|}
-\hline
-&\textbf{Command}&\textbf{Size Before Padding}&\textbf{Size After Padding}\\
-\hline
-	Name change & PRP 123 MFN hacked$\backslash$r$\backslash$n & 20 & 24 \\
-	Client ping & PNG$\backslash$r$\backslash$n & 5 & 6 \\
-	Server ping & CHL 0 8359197213018043653$\backslash$r$\backslash$n & 28 & 60 \\
-	Server ping response & QRY 12$\backslash$r$\backslash$n & 8 & 8 \\
-\hline
-\end{tabular}}
-\hfill{}
-\caption{Display Name Spoofing Padded Commands}
-\label{tb:dispNameSpoofingCmds}
-\end{table*}
+In order to demonstrate the feasibility of ABTH, the follow sections demonstrate the spoofing of an MSNP command without disconnecting the client.
+The spoofed command creates the effect of identity impersonation.
+The attack uses the official WLM client and the live .NET Messaging Service, as well as a a custom-made rogue WLM mixer server to which the WLM client connects.
 
 \subsection{Identity Spoofing}
 
-By exploiting the same vulnerability, ABTH can be used to spoof the identities of WLM users.
-As illustrated in Figure 2, when a user wishes to initiate a conversation with another contact, the user first requests an IM session through the NS.
-The NS returns a session authentication ID and network destination IP address and port that points to a mixer.
-The client then establishes a persistent TCP connection to the designated mixer.
-Once the client’s connection to the mixer has been established, the client proceeds to invite other contacts to join the conversation.
-Each invited contact receives an invite through their NS connection to connect to the specified mixer.
-Once all parties are connected to the mixer, the mixer relays all instant messages to the WLM clients.
+When TCP seqnums are synchronized, NS acknum should match client seqnum and client acknum should match NS seqnum, as shown in the first row of Table \ref{tab:identityspoof}.
+An attacker can inject a \texttt{RNG} command to the client, who will open a new TCP connection and connect to the address of a mixer server (which the attacker may specify as a rogue mixer).
+Following the injection of the packet, the seqnums and acknums of the WLM client and the NS become desynchronized and can be resynchronized with ABTH.
+For demonstration purposes, the seqnums of the client and the NS are assumed to be 100 and 500 prior to the spoofed packet.
 
-% Insert IM Initiation sequencing diagram here
+While the seqnums of the NS or the client cannot be controlled, pings can provoke responses to inflate seqnums.
+Each command is sent or received by the attacker in the order listed in Table \ref{tab:identityspoof}.
 
-In order to spoof an instant messaging session, a spoofed invite message is injected to the victim (step 4 of Figure 2).
-As shown in Table 1, the invite message contains the address of a mixer server of our designation and the identity of the contact that we wished to impersonate, in this case Bob.
+\begin{table*}[tbp]
+	\centering
 
-Upon receiving the invite message, Alice will establish a connection to the address of the mixer server specified in the invite message, which in this scenario will be rogue mixer server. As a result of the injected invite, the TCP connection between the NS and Alice's WLM client are now out of sync.
-Thus, ABTH is employed to mask the effects of the injected packets.
+	\caption{Identity Spoofing Sequence Numbers}
+	\label{tab:identityspoof}
 
-\begin{center}
-\begin{table*}[tbh!]
-{\small
-\hfill{}
-\begin{tabular}{|l p{5cm} l l|}
-\hline
-&\textbf{Command}&\textbf{Size Before Padding}&\textbf{Size After Padding}\\
-\hline
-	Mixer invite & RNG 1312697181 65.217.175.28:1863 CKI 17021696.318151 msnp\_bob@hotmail.com Bob U messenger.msn.com 1$\backslash$r$\backslash$n & 102 & 120 \\
-	Client ping & PNG$\backslash$r$\backslash$n & 5 & 5 \\
-	Server ping & CHL 0 8359197213018043653$\backslash$r$\backslash$n & 28 & 28 \\
-	Server ping response & QRY 12$\backslash$r$\backslash$n & 8 & 8 \\
-\hline
-\end{tabular}}
-\hfill{}
-\caption{Identity Spoofing Padded Commands}
-\label{tb:identitySpoofingCmds}
+	\begin{tabular}{l l l r r r r r}
+		\hline
+		\hline
+		\textbf{Command} & \textbf{Sent By} & \textbf{Received By} & \textbf{Data Size} & \textbf{Client Seq} & \textbf{Client Ack} & \textbf{NS Seq} & \textbf{NS Ack} \\
+		\hline
+		\multicolumn{4}{l}{\textbf{Before Attack}} & 100 & 500 & 500 & 100 \\
+		RNG & Attacker & Client & 120 & 100 & \textbf{620} & 500 & 100 \\
+		\multicolumn{8}{l}{\textbf{Begin ABTH}} \\
+		PNG & Attacker & NS & 5 & 100 & 620 & 500 & \textbf{105} \\
+		QNG & NS & Attacker & 8 & 100 & 620 & \textbf{508} & 105 \\
+		\multicolumn{4}{l}{\textbf{Repeat PNG/QNG exchange for 23 more times}} & 100 & 620 & \textbf{692} & \textbf{220} \\
+		CHL & Attacker & Client & 28 & 100 & \textbf{648} & 692 & 220 \\
+		QRY & Client & Attacker & 60 & \textbf{160} & 648 & 692 & 220 \\
+		QRY & Attacker & Client & 8 & 160 & \textbf{656} & 692 & 220 \\
+		CHL & Attacker & Client & 28 & 100 & \textbf{684} & 692 & 220 \\
+		QRY & Client & Attacker & 60 & \textbf{220} & 684 & 692 & 220 \\
+		QRY & Attacker & Client & 8 & 220 & \textbf{692} & 692 & 220 \\
+		\hline
+		\hline
+		\multicolumn{4}{l}{\textbf{After ABTH}} & 220 & 692 & 692 & 220 \\
+	\end{tabular}
 \end{table*}
-\end{center}
 
-% Insert packet exchange of identity spoofing table here
+As the last row of Table \ref{tab:identityspoof} shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and resynchronized and the TCP connection.
+The connection is now is ready to transmit further legitimate and/or illegitimate packets.
 
-Once connected to the victim, the rogue mixer server will send the identities of the participants already in the messaging session through the IRO command, which in this case is Bob only, as shown in Table 1.
-At this point, the rogue mixer server has established a legitimate TCP connection with the victim and no additional attack packets are required to send messages to Alice on behalf of Bob.
-
-Alice's WLM client will recognize the Bob’s email and display name as a contact on their contact list, and the client will assume that an authentic instant messaging session had been established with Bob (msnp\_bob@hotmail.com).
-Through the rogue mixer server, an attacker is able to impersonate Bob and can send any number of instant messages to Alice with Alice unable to determine the distinction between the attacker and the real Bob.
+At this point, the victim will have established a connection to the rogue mixer server, which acts as a regular server that can send and receive messages as any user the attacker wishes to impersonate.
+The victim would not recognize such imposture, as the victim cannot differentiate a rogue mixer server from a legitimate one.
+No additional attacks are required to send and receive any message from the victim as the impersonated user.
 
 \section{Discussion}
 
