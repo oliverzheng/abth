@@ -19,7 +19,6 @@
 \title{
 Application-Based TCP Hijacking
 }
-\subtitle{Case Study on Windows Live Messenger}
 
 \numberofauthors {3}
 \author {
@@ -39,7 +38,7 @@ Application-Based TCP Hijacking
 \maketitle
 
 \begin{abstract}
-We present Application-Based TCP Hijacking (ABTH), a technique that exploits flaws within the transport and application protocols to inject data into an application session without either end noticing it. Following the injection of a TCP packet, ABTH is used to re-synchronize the TCP stacks of both the server and the client. To demonstrate the effectiveness of ABTH, we present an attack on Windows Live Messenger in which we use ABTH to perform command spoofing and user impersonation. Due to its generic nature, ABTH can be mounted on a variety of application protocols. We also propose specific countermeasures to thwart and/or limit ABTH, such as strict Ethernet switching prevention and cryptographic protection of messages.
+Application-Based TCP Hijacking (ABTH) is the technique presented in this paper that exploits flaws within the transport and application protocols to inject data into an application session without either hosts noticing the spoofing attack. Following the injection of a TCP packet, ABTH is used to re-synchronize the TCP stacks of both the server and the client. To demonstrate the effectiveness of ABTH, it will be evaluated against Windows Live Messenger where ABTH will be used to impersonate an end-user. Due to its generic nature, ABTH can be mounted on a variety of application protocols. Countermeasures to thwart and/or limit the effectiveness of ABTH include strict Ethernet switching prevention and cryptographic protection of messages.
 \end{abstract}
 
 \terms{Security, Theory}
@@ -50,7 +49,7 @@ We present Application-Based TCP Hijacking (ABTH), a technique that exploits fla
 
 Since its first specification in 1974~\cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET. The security properties of these application protocols are partially dependent on the security of TCP and the underlying Internet Protocol (IP). Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design~\cite{harris:tcpattacks}. While preventive mechanisms have been developed to throttle or outright eliminate most of these attacks~\cite{dubrawsky:layer2}, the list of TCP vulnerabilities continues to grow. 
 
-In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication. ABTH extends TCP hijackingS~\cite{stamp:infosec} by meddling with application-layer protocols. Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers. However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks. On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.  Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
+In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication. ABTH extends TCP hijacking~\cite{stamp:infosec} by meddling with application-layer protocols. Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers. However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks. On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.  Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
 
 To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented. With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks. By attacking the Microsoft Notification Protocol (MSNP) with ABTH, the privacy and confidentialiy of WLM users will be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim. As a result, unauthorized messages can be delivered to various contacts. Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results. Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 
@@ -124,13 +123,13 @@ To avoid an ack storm from occurring, the order in which these packets are injec
 Once this is achieved, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully. In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that not only conforms with the specification for TCP and the application protocol, but it also maintains a statistically low profile of network footprint. This allows the attacker to carry out an attack, without exploits prohibited and impractical in well-controlled networks, and evade existing intrusion detection systems.
 The significance of ABTH provides the attacker an exit strategy in which the attack may be executed unnoticed.
 
-\section{Case Study: Attacking Windows Live Messenger with ABTH}
+\section{Case Study: Windows Live Messenger}
 
-First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services. WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service \cite{piccard:imsecurity}.
+First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services. WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service~\cite{piccard:imsecurity}.
 
 \subsection{.NET Messenger Service}
 
-The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication. The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers \cite{torre:wlm}.
+The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication. The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
 
 When a user logs into their WLM account, a persistent TCP connection to the NS is opened. This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service. 
 This connection is used to transmit information regarding a user's contact list and presence information (e.g. user status, email notification).
@@ -150,8 +149,8 @@ The NS also setups sends information regarding mixer servers, which relays all I
 \subsection{Microsoft Notification Protocol}
 
 MSNP is a text-based application protocol used for communication between WLM clients and servers.
-Although the protocol was first intended to be an open standard \cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
-However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful \cite{hypothetic:msnp, msnfanatic:msnp}.
+Although the protocol was first intended to be an open standard~\cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
+However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful~\cite{hypothetic:msnp, msnfanatic:msnp}.
 
 The protocol consists of plain text commands; each MSNP command is prefixed with three capital letters (e.g., command PNG represents ping).
 
@@ -191,7 +190,7 @@ The protocol consists of plain text commands; each MSNP command is prefixed with
 To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bi-directional pings; both the WLM client and the NS have the ability to initiate a ping.
 The client pings the NS with PNG; the NS pings the client with CHL.
 Both pings provoke responses, which must be sent to prevent disconnection from the messaging service.
-WLM, the official MSNP IM application, pings the NS every 45 seconds whereas in alternative IM clients such as Pidgin \cite{pidgin:url}, ping the NS every 30 seconds.
+WLM, the official MSNP IM application, pings the NS every 45 seconds whereas in alternative IM clients such as Pidgin~\cite{pidgin:url}, ping the NS every 30 seconds.
 Table \ref{tab:commandlist} specifies the structure of those MSNP commands that are relevant to our ABTH attack on MSNP.
 Note that the ping-response initiated by the NS entails three transactions (CHL-QRY-QRY).
 
@@ -265,43 +264,28 @@ Our implementation of ABTH on the MSNP protocol calculates and generates the req
 
 \subsection{Countermeasures}
 
-A straight-forward countermeasure against ABTH is to encrypt all application traffic with SSL/TLS to authenticate messages.
-However, large-scale applications such as IM applications that use MSNP would require substantial server resources in encrypting all network traffic.
+In order to properly authenticate messages, a straight-forward countermeasure against ABTH is to encrypt all application traffic, for example with SSL/TLS. However, with over 17 million unique user~\cite{templeton:spoof}, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic. In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the Mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application. As a case in point, SimpLite-MSN~\cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, thus providing protection against spoofing.
 
-Some applications may connect peers to peers, as MSNP does implicitly by allowing a communication channel between two clients.
-In such cases, clients may encrypt traffic and authenticate each other through the channel provided by the application.
-As a case in point, SimpLite-MSN \cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, providing protection against spoofing.
+As ABTH requires a pre-determined amount of spoof packets to inflate the seqnums and acknums of the hosts, intrusion detection systems (IDS) may detect this form of attack due to the sudden spike in traffic between the hosts. However, this behaviour may step within the boundaries of legitimate application traffic.
 
-Intrusion detection systems (IDS) may possibily detect ABTH given a well characterized behaviour of attacks.
-Since ABTH utilizes minimal resources and is limited to the specification of TCP and the application, the behaviour would need to be described precisely, which may or may not be feasible as it may step within boundaries of legitimate application traffic.
-
-Even if packets are sent in plain text, a simple regulatory mechanism of the application protocol could present some integrity with each message, such as tagging application messages with sequence numbers.
-It would be difficult to inject a packet and expect further messages to be accepted since the application also keeps track of the list of messages.
+Furthermore, a regulatory mechanism in the application protocol, such as tagging application messages with sequence numbers, has the potential for providing integrity for each packet. By using such a mechanism, it would be difficult to inject a packet and expect further messages to be accepted as the application would keep track of the list of messages.
 This straightforward yet non-trivial detail also alleviates the application protocol from its dependence on the network layer and the assumption that packets on the network layer are authentic.
 
-For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network \cite{templeton:spoof}.
+For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network~\cite{templeton:spoof}.
 However, this method would be ineffective in a wireless medium, such as WiFi.
-Of course, encryping of WiFi traffic would circumvent ABTH.
 
 \subsection{Feasibility}
 
-Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command.
-Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%.
-As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
+Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command. Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%. As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
 
-In environments that provide a common physical communication medium, ABTH may present a threat.
-Examples include hubbed networks, coffee shops that offer WiFi service, and increasingly popular virtualized servers.
-Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
-It is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
+In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer WiFi service, ABTH poses a threat. Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels. As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
 
 \section{Conclusion}
 
 By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, Application-Based TCP Hijacking (ABTH) offers an elegant way of exploiting certain application protocols.
-Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command.
-We presented a proof of ABTH concept by successfully experimenting with two forms of attacks on Windows Live Messenger, Microsoft's popular instant messaging application, which runs over the Microsoft Notification Protocol (MSNP).
+Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command. We presented a proof of ABTH concept by successfully evaluating it against Windows Live Messenger, Microsoft's popular instant messaging application, which uses the Microsoft Notification Protocol (MSNP).
 
-While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities.
-Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
+While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities. Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
 
 \bibliographystyle{abbrv}
 \bibliography{abthmsnp}
