@@ -39,6 +39,8 @@ void MSNPContactManager::ParsePacket( MSNPPacket msnpPacket )
 		case MSNPPacket::SIGN_OUT:
 			onlineContactList->clear();
 			break;
+		default:
+			break;
 	}
 
 	if ( ilnRx ) ParseForILN(msnpPacket);
