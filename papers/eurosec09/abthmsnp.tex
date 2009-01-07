@@ -12,7 +12,7 @@
 
 % --- Metadata ---
 \conferenceinfo{EuroSec}{'09 Nuremberg, Germany}
-\CopyrightYear{2007}
+\CopyrightYear{2009}
 %\crdata{0-12345-67-8/90/01}
 % --- End Metadata ---
 
@@ -56,13 +56,14 @@ The security properties of these application protocols are partially dependent o
 Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design~\cite{harris:tcpattacks}.
 While preventive mechanisms have been developed to throttle or outright eliminate most of these attacks~\cite{dubrawsky:layer2}, the list of TCP vulnerabilities continues to grow.
 
-
+\begin{sloppypar}
 In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication.
 ABTH extends TCP hijacking~\cite{stamp:infosec} by meddling with application-layer protocols.
 Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers.
 However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks.
 On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.
- Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
+Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
+\end{sloppypar}
 
 To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented.
 With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks.
@@ -112,9 +113,7 @@ If the received seqnum is within the range of the expected seqnum and the rcvwnd
 
 Many attacks on TCP exploit vulnerabilities of the seqnum and acknum synchronization mechanism.
 In order to demonstrate the value of ABTH, attacks pertinent to ABTH are first discussed in the following sections.
-All of these attacks, including ABTH, assume the threat model that the attacker is able to listen to network traffic of a TCP session and inject spoofed packets into the network.
-None of these attacks, including ABTH, aim to disable either host, for example, by launching a denial-of-service attack; rather, the aim of all these attacks is to circumvent detection and compromise systems without the knowledge of the victims.
-Thus, the attacker cannot delete or reroute network traffic.
+All of these attacks, including ABTH, assume the threat model defined in Section~\ref{sec:adversarymodel}.
 
 \subsubsection{TCP Hijacking}
 
@@ -163,8 +162,25 @@ As discussed, existing attacks on TCP do not provide much guarantee for an attac
 
 ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection.
 It is a specific way of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer.
-By exploiting vulnerabilities in the combination of TCP and application protocol, ABTH allows an attacker to send a spoofed packet and quickly restore TCP synchronization without the victims detecting anything amiss.
-The technique assumes the same threat model as was described in TCP hijacking in the background section.
+The technique assumes the following adversary model.
+
+
+\subsection{Adversary Model}
+\label{sec:adversarymodel}
+
+The main assumption about the adversary is that they are able to listen to network traffic of a TCP session and inject spoofed packets into the network.
+We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack, delete or reroute network traffic
+Sniffing and spoofing are limited in wired networks.
+For example, network switches prevent sniffing in Ethernet and it is usually very hard to sniff on routers.
+Internet service providers (ISPs) and enterprises often use network access control to block IP spoofing.
+However, in wireless networks, especially in 802.11 networks, sniffing and spoofing can be done with well designed software and off-the-shelf hardware.
+This is also the reason why in our case study (Section~\ref{sec:casestudy}) we demonstrated the feasibility of ABTH for Windows Live Messenger using a wireless network.
+However, our attack should also work in wired networks.
+
+Computational capabilities of the attacker do not go beyond the limits of a consumer-level personal computer.
+For example, in our implementation of of ABTH for Windows Live Messenger, the victim was attacked in the matter of two seconds with the use of a modest laptop.
+
+\subsection{Attack Details}
 
 Many application protocols intended for two-way communication, such as TELNET and FTP, maintain a persistent TCP connection.
 A typical method for ensuring the connection is open is by instructing a host to periodically send application-level command to the other host.
@@ -188,6 +204,7 @@ This allows the attacker to carry out an attack, without exploits prohibited and
 The significance of ABTH provides the attacker an exit strategy in which the attack may be executed unnoticed.
 
 \section{Case Study: Windows Live Messenger}
+\label{sec:casestudy}
 
 First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services.
 WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service~\cite{piccard:imsecurity}.
@@ -267,7 +284,7 @@ To determine the validity of the persistent connection between the NS and the cl
 The client pings the NS with PNG; the NS pings the client with CHL.
 Both pings provoke responses, which must be sent to prevent disconnection from the messaging service.
 WLM, the official MSNP IM application, pings the NS every 45 seconds whereas in alternative IM clients such as Pidgin~\cite{pidgin:url}, ping the NS every 30 seconds.
-Table \ref{tab:commandlist} specifies the structure of those MSNP commands that are relevant to our ABTH attack on MSNP.
+Table~\ref{tab:commandlist} specifies the structure of those MSNP commands that are relevant to our ABTH attack on MSNP.
 Note that the ping-response initiated by the NS entails three transactions (CHL-QRY-QRY).
 
 An attacker can inject an MSNP command by listening to the TCP traffic.
@@ -282,13 +299,13 @@ The attack uses the official WLM client and the live .NET Messaging Service, as 
 
 \subsection{Identity Spoofing}
 
-When TCP seqnums are synchronized, NS acknum should match client seqnum and client acknum should match NS seqnum, as shown in the first row of Table \ref{tab:identityspoof}.
+When TCP seqnums are synchronized, NS acknum should match client seqnum and client acknum should match NS seqnum, as shown in the first row of Table~\ref{tab:identityspoof}.
 An attacker can inject a \texttt{RNG} command to the client, who will open a new TCP connection and connect to the address of a mixer server (which the attacker may specify as a rogue mixer).
 Following the injection of the packet, the seqnums and acknums of the WLM client and the NS become desynchronized and can be resynchronized with ABTH.
 For demonstration purposes, the seqnums of the client and the NS are assumed to be 100 and 500 prior to the spoofed packet.
 
 While the seqnums of the NS or the client cannot be controlled, pings can provoke responses to inflate seqnums.
-Each command is sent or received by the attacker in the order listed in Table \ref{tab:identityspoof}.
+Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
 \begin{table*}[tbp]
 	\centering
@@ -319,7 +336,7 @@ Each command is sent or received by the attacker in the order listed in Table \r
 	\end{tabular}
 \end{table*}
 
-As the last row of Table \ref{tab:identityspoof} shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and resynchronized and the TCP connection.
+As the last row of Table~\ref{tab:identityspoof} shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and resynchronized and the TCP connection.
 The connection is now is ready to transmit further legitimate and/or illegitimate packets.
 
 At this point, the victim will have established a connection to the rogue mixer server, which acts as a regular server that can send and receive messages as any user the attacker wishes to impersonate.
