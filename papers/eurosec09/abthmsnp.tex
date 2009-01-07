@@ -38,7 +38,11 @@ Application-Based TCP Hijacking
 \maketitle
 
 \begin{abstract}
-Application-Based TCP Hijacking (ABTH) is the technique presented in this paper that exploits flaws within the transport and application protocols to inject data into an application session without either hosts noticing the spoofing attack. Following the injection of a TCP packet, ABTH is used to re-synchronize the TCP stacks of both the server and the client. To demonstrate the effectiveness of ABTH, it will be evaluated against Windows Live Messenger where ABTH will be used to impersonate an end-user. Due to its generic nature, ABTH can be mounted on a variety of application protocols. Countermeasures to thwart and/or limit the effectiveness of ABTH include strict Ethernet switching prevention and cryptographic protection of messages.
+Application-Based TCP Hijacking (ABTH) is the technique presented in this paper that exploits flaws within the transport and application protocols to inject data into an application session without either hosts noticing the spoofing attack
+Following the injection of a TCP packet, ABTH is used to re-synchronize the TCP stacks of both the server and the client
+To demonstrate the effectiveness of ABTH, it will be evaluated against Windows Live Messenger where ABTH will be used to impersonate an end-user
+Due to its generic nature, ABTH can be mounted on a variety of application protocols
+Countermeasures to thwart and/or limit the effectiveness of ABTH include strict Ethernet switching prevention and cryptographic protection of messages.
 \end{abstract}
 
 \terms{Security, Theory}
@@ -47,17 +51,35 @@ Application-Based TCP Hijacking (ABTH) is the technique presented in this paper 
 
 \section{Introduction}
 
-Since its first specification in 1974~\cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET. The security properties of these application protocols are partially dependent on the security of TCP and the underlying Internet Protocol (IP). Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design~\cite{harris:tcpattacks}. While preventive mechanisms have been developed to throttle or outright eliminate most of these attacks~\cite{dubrawsky:layer2}, the list of TCP vulnerabilities continues to grow. 
+Since its first specification in 1974~\cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET
+The security properties of these application protocols are partially dependent on the security of TCP and the underlying Internet Protocol (IP)
+Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design~\cite{harris:tcpattacks}
+While preventive mechanisms have been developed to throttle or outright eliminate most of these attacks~\cite{dubrawsky:layer2}, the list of TCP vulnerabilities continues to grow
 
-In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication. ABTH extends TCP hijacking~\cite{stamp:infosec} by meddling with application-layer protocols. Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers. However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks. On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.  Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
 
-To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented. With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks. By attacking the Microsoft Notification Protocol (MSNP) with ABTH, the privacy and confidentialiy of WLM users will be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim. As a result, unauthorized messages can be delivered to various contacts. Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results. Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
+In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication
+ABTH extends TCP hijacking~\cite{stamp:infosec} by meddling with application-layer protocols
+Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers
+However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks
+On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers
+ Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
+
+To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented
+With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks
+By attacking the Microsoft Notification Protocol (MSNP) with ABTH, the privacy and confidentialiy of WLM users will be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim
+As a result, unauthorized messages can be delivered to various contacts
+Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results
+Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 
 Among several ways to circumvent ABTH, application protocols could encrypt packets and thus put off TCP security exploits.
 Internet service providers (ISPs) could employ stricter security controls on the network layer.
 
-The remainder of the paper is organized as follows. Relevant background information on TCP and existing attacks on the transport protocol are discussed in Section 2. The theory and general operation of ABTH is described in Section 3.
-The applicability of ABTH on MSNP is demonstrated in Section 4. The limitations of ABTH and countermeasures against it are discussed in Section 5. The paper is concluded in Section 6.
+The remainder of the paper is organized as follows
+Relevant background information on TCP and existing attacks on the transport protocol are discussed in Section 2
+The theory and general operation of ABTH is described in Section 3.
+The applicability of ABTH on MSNP is demonstrated in Section 4
+The limitations of ABTH and countermeasures against it are discussed in Section 5
+The paper is concluded in Section 6.
 
 \section{Background and Related Work}
 
@@ -65,37 +87,69 @@ In this section, necessary background information on TCP including the details o
 
 \subsection{Overview of TCP}
 
-TCP is a connection-oriented transport protocol that guarantees reliable in-order delivery of network packets~\cite{rfc:tcp}. A pair of hosts initiate contact and communicate by sending packets to each other.
+TCP is a connection-oriented transport protocol that guarantees reliable in-order delivery of network packets~\cite{rfc:tcp}
+A pair of hosts initiate contact and communicate by sending packets to each other.
 Each end of the connection is identified by an Internet Protocol (IP) address and a TCP port, both of which are determined prior to the establishment of connection.
 
-Each TCP packet is tagged with a sequence number, an acknowledgement number, and a receive window, herein referred to as seqnum, acknum, and rcvwnd, respectively. seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing. Within each TCP header are also 8 control bits or flags. Packets containing data set the SYN and ACK flags; packets with no data only set the ACK flag to denote an empty acknowledgement packet. For every data packet sent, an acknowledgement packet has to be received to affirm packet delivery. A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
+Each TCP packet is tagged with a sequence number, an acknowledgement number, and a receive window, herein referred to as seqnum, acknum, and rcvwnd, respectively
+seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing
+Within each TCP header are also 8 control bits or flags
+Packets containing data set the SYN and ACK flags; packets with no data only set the ACK flag to denote an empty acknowledgement packet
+For every data packet sent, an acknowledgement packet has to be received to affirm packet delivery
+A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
 
-The seqnum of one host must match the acknum of the other and vice versa for the two hosts to be in a synchronized state where data packets can be received and processed as valid packets. As an example to illustrate seqnum and acknum, a client connects to a server through TCP. After establishing a connection, assume the client is seqnum 50 and the server is seqnum 100. The next packet the client sends must entail seqnum 50 and acknum 100. If the client sends a data packet of 10 bytes, the client seqnum increases to 60 and the server must send an acknowledgement packet with seqnum 100 and acknum 60.
+The seqnum of one host must match the acknum of the other and vice versa for the two hosts to be in a synchronized state where data packets can be received and processed as valid packets
+As an example to illustrate seqnum and acknum, a client connects to a server through TCP
+After establishing a connection, assume the client is seqnum 50 and the server is seqnum 100
+The next packet the client sends must entail seqnum 50 and acknum 100
+If the client sends a data packet of 10 bytes, the client seqnum increases to 60 and the server must send an acknowledgement packet with seqnum 100 and acknum 60.
 
-In the event that either host receives a packet containing an unexpected seqnum, two cases dictate the outcome. If the received seqnum is within the range of the expected seqnum and the rcvwnd (the packet received arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent. (An acknowledgement packet would confirm the reception of the missing packet.) Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{anderson:ackstorm} which is, in the persepective of an attacker, an undesirable effect.
+In the event that either host receives a packet containing an unexpected seqnum, two cases dictate the outcome
+If the received seqnum is within the range of the expected seqnum and the rcvwnd (the packet received arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent
+(An acknowledgement packet would confirm the reception of the missing packet.) Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{anderson:ackstorm} which is, in the persepective of an attacker, an undesirable effect.
 
 \subsection{Attacks on TCP}
 
 Many attacks on TCP exploit vulnerabilities of the seqnum and acknum synchronization mechanism.
 In order to demonstrate the value of ABTH, attacks pertinent to ABTH are first discussed in the following sections.
-All of these attacks, including ABTH, assume the threat model that the attacker is able to listen to network traffic of a TCP session and inject spoofed packets into the network. None of these attacks, including ABTH, aim to disable either host, for example, by launching a denial-of-service attack; rather, the aim of all these attacks is to circumvent detection and compromise systems without the knowledge of the victims. Thus, the attacker cannot delete or reroute network traffic.
+All of these attacks, including ABTH, assume the threat model that the attacker is able to listen to network traffic of a TCP session and inject spoofed packets into the network
+None of these attacks, including ABTH, aim to disable either host, for example, by launching a denial-of-service attack; rather, the aim of all these attacks is to circumvent detection and compromise systems without the knowledge of the victims
+Thus, the attacker cannot delete or reroute network traffic.
 
 \subsubsection{TCP Hijacking}
 
-By eavesdropping on a TCP session, an attacker is able to observe and calculate the expected seqnums and acknums of both hosts and is therefore able to inject a spoofed TCP packet~\cite{harris:tcpattacks}. The spoofed packet would contain the seq and ack numbers expected by the recipient and the source address of the other host. Although the packet was sent by the attacker, the recipient does not have the ability to authenticate the source of the packet and would therefore accept it as a valid packet. However, following this spoof, the connection is effectively broken as the expected seqnums and acknums of the two hosts are out of sync. Data packets sent to either host would be regarded as invalid due to the mismatch of numbers, and no acknowledgement packets are sent in response. Thus, the connection is quickly reset by both hosts. As a result, both hosts would notice a disruption in the network service and may suspect an attack.
+By eavesdropping on a TCP session, an attacker is able to observe and calculate the expected seqnums and acknums of both hosts and is therefore able to inject a spoofed TCP packet~\cite{harris:tcpattacks}
+The spoofed packet would contain the seq and ack numbers expected by the recipient and the source address of the other host
+Although the packet was sent by the attacker, the recipient does not have the ability to authenticate the source of the packet and would therefore accept it as a valid packet
+However, following this spoof, the connection is effectively broken as the expected seqnums and acknums of the two hosts are out of sync
+Data packets sent to either host would be regarded as invalid due to the mismatch of numbers, and no acknowledgement packets are sent in response
+Thus, the connection is quickly reset by both hosts
+As a result, both hosts would notice a disruption in the network service and may suspect an attack.
 
 \subsubsection{Man-in-the-Middle}
 
-Following a TCP hijacking attack, the attacker can act as the man-in-the-middle, by relaying all messages from one host to the other~\cite{joncheray:simpleattack, gregg:stackhack}. Each host would receive an acknowledgement for every sent packet, since the attacker is injecting a spoofed packet for each packet sent by translating seqnums and acknums on the fly. However, a problem arises when each host receives the original packets sent by each other. As previously mentioned, a packet is considered valid if its seqnum falls within the range of the expected seqnum and the rcvwnd. Spoofed packets cause the spoofed host to lag behind on its seqnum, and thus packets sent from the spoofed host are not in the acceptable range. Subsequently, for each packet the spoofed host sends, the other host drops it and sends back an acknowledgement packet with the expected seqnum and acknum trying to correct this desynchronization. The spoofed host would try to do the same by sending an acknowledgement packet, which incites the other host to send another. This repeated cycle of sending packets creates an ack storm, in which both hosts continuously send empty packets.
+Following a TCP hijacking attack, the attacker can act as the man-in-the-middle, by relaying all messages from one host to the other~\cite{joncheray:simpleattack, gregg:stackhack}
+Each host would receive an acknowledgement for every sent packet, since the attacker is injecting a spoofed packet for each packet sent by translating seqnums and acknums on the fly
+However, a problem arises when each host receives the original packets sent by each other
+As previously mentioned, a packet is considered valid if its seqnum falls within the range of the expected seqnum and the rcvwnd
+Spoofed packets cause the spoofed host to lag behind on its seqnum, and thus packets sent from the spoofed host are not in the acceptable range
+Subsequently, for each packet the spoofed host sends, the other host drops it and sends back an acknowledgement packet with the expected seqnum and acknum trying to correct this desynchronization
+The spoofed host would try to do the same by sending an acknowledgement packet, which incites the other host to send another
+This repeated cycle of sending packets creates an ack storm, in which both hosts continuously send empty packets.
 
-While the ack storm stops as soon as one packet is dropped due to the unreliability of the underlying physical network, it creates a massive load of network traffic~\cite{joncheray:simpleattack}. Intrusion detection systems can characterize this load with statistical analysis of empty packets on the network and notify users of the attack.
+While the ack storm stops as soon as one packet is dropped due to the unreliability of the underlying physical network, it creates a massive load of network traffic~\cite{joncheray:simpleattack}
+Intrusion detection systems can characterize this load with statistical analysis of empty packets on the network and notify users of the attack.
 
 \subsubsection{ARP Poisoning}
 
-A method of avoiding TCP ack storms is to stop hosts from receiving legitimate packets. While the attacker cannot delete or reroute packets, the attacker can utilize Address Resolution Protocol (ARP) poisoning to mislead hosts into ignoring legitimate packets. ARP provides translation of IP address to MAC address. If the ARP is poisoned with the wrong MAC address, a host will send TCP/IP packets to the wrong MAC address and ignore incoming packets from the real MAC address.
+A method of avoiding TCP ack storms is to stop hosts from receiving legitimate packets
+While the attacker cannot delete or reroute packets, the attacker can utilize Address Resolution Protocol (ARP) poisoning to mislead hosts into ignoring legitimate packets
+ARP provides translation of IP address to MAC address
+If the ARP is poisoned with the wrong MAC address, a host will send TCP/IP packets to the wrong MAC address and ignore incoming packets from the real MAC address.
 The attacker needs only to ARP poison one host to circumvent ack storms, as the compromised host will not respond to the other host.
 
-However, ARP traffic does not travel beyond the local area network (LAN) and imposes the restriction that the attacker be within the same LAN as at least one host. More importantly, ARP poisoning is a low network level attack that can be easily prevented with hardware enforcement~\cite{spangler:sniffing}; most hardware switches disable ARP poisoning.
+However, ARP traffic does not travel beyond the local area network (LAN) and imposes the restriction that the attacker be within the same LAN as at least one host
+More importantly, ARP poisoning is a low network level attack that can be easily prevented with hardware enforcement~\cite{spangler:sniffing}; most hardware switches disable ARP poisoning.
 
 \subsubsection{Restoring Synchronization}
 
@@ -107,33 +161,49 @@ As discussed, existing attacks on TCP do not provide much guarantee for an attac
 
 \section{Application-Based TCP Hijacking}
 
-ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection. It is a specific way of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer. By exploiting vulnerabilities in the combination of TCP and application protocol, ABTH allows an attacker to send a spoofed packet and quickly restore TCP synchronization without the victims detecting anything amiss.
+ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection
+It is a specific way of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer
+By exploiting vulnerabilities in the combination of TCP and application protocol, ABTH allows an attacker to send a spoofed packet and quickly restore TCP synchronization without the victims detecting anything amiss.
 The technique assumes the same threat model as was described in TCP hijacking in the background section.
 
-Many application protocols intended for two-way communication, such as TELNET and FTP, maintain a persistent TCP connection. A typical method for ensuring the connection is open is by instructing a host to periodically send application-level command to the other host.
+Many application protocols intended for two-way communication, such as TELNET and FTP, maintain a persistent TCP connection
+A typical method for ensuring the connection is open is by instructing a host to periodically send application-level command to the other host.
 Application-level commands, such as a ping, feature two characteristics of particular importance: they prompt automatic response from the other host, and they do not modify application states.
-These two characteristics allow an attacker to bring a lagging seqnum of a host up to a desired seqnum. 
+These two characteristics allow an attacker to bring a lagging seqnum of a host up to a desired seqnum
+
 
 ABTH exploits these seemingly trivial application-level commands at the TCP level to perform TCP hijacking and resynchronization.
-In most application protocols, a ping to a host will provoke a response; using this knowledge we can inflate the seqnum of the host. Assuming ping responses exceed the data length of pings, by injecting a certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
+In most application protocols, a ping to a host will provoke a response; using this knowledge we can inflate the seqnum of the host
+Assuming ping responses exceed the data length of pings, by injecting a certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
 As such, an attacker can spoof a packet containing a malicious command and hide the spoof by sending innocuous commands.
 
-To avoid an ack storm from occurring, the order in which these packets are injected should follow a specific rule. For a packet sent by each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, and the acknum should not be larger than the seqnum of the recipient host. For the attacker, this means alternating the spoofing of packets between the two hosts for them to catch up to each other. If followed correctly, only a few ack packets would be sent and no ack storm would occur.
+To avoid an ack storm from occurring, the order in which these packets are injected should follow a specific rule
+For a packet sent by each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, and the acknum should not be larger than the seqnum of the recipient host
+For the attacker, this means alternating the spoofing of packets between the two hosts for them to catch up to each other
+If followed correctly, only a few ack packets would be sent and no ack storm would occur.
 
-Once this is achieved, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully. In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that not only conforms with the specification for TCP and the application protocol, but it also maintains a statistically low profile of network footprint. This allows the attacker to carry out an attack, without exploits prohibited and impractical in well-controlled networks, and evade existing intrusion detection systems.
+Once this is achieved, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully
+In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that not only conforms with the specification for TCP and the application protocol, but it also maintains a statistically low profile of network footprint
+This allows the attacker to carry out an attack, without exploits prohibited and impractical in well-controlled networks, and evade existing intrusion detection systems.
 The significance of ABTH provides the attacker an exit strategy in which the attack may be executed unnoticed.
 
 \section{Case Study: Windows Live Messenger}
 
-First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services. WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service~\cite{piccard:imsecurity}.
+First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services
+WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers within the .NET Messenger Service~\cite{piccard:imsecurity}.
 
 \subsection{.NET Messenger Service}
 
-The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication. The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
+The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication
+The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
 
-When a user logs into their WLM account, a persistent TCP connection to the NS is opened. This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service. 
-This connection is used to transmit information regarding a user's contact list and presence information (e.g. user status, email notification).
-The NS also setups sends information regarding mixer servers, which relays all IM sessions between clients. 
+When a user logs into their WLM account, a persistent TCP connection to the NS is opened
+This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service
+
+This connection is used to transmit information regarding a user's contact list and presence information (e.g
+user status, email notification).
+The NS also setups sends information regarding mixer servers, which relays all IM sessions between clients
+
 
 \begin{figure}[h]
 	\centering
@@ -165,12 +235,18 @@ The protocol consists of plain text commands; each MSNP command is prefixed with
 		\hline
 		\textbf{Command} & \textbf{Description} & \textbf{Size} \\
 		\hline
-		\texttt{PNG$\backslash$r$\backslash$n} & Client command to ping the NS. & 5 \\
-		\texttt{QNG [2]$\backslash$r$\backslash$n} & NS's response to PNG. & 8 \\
-		\texttt{CHL [22]$\backslash$r$\backslash$n} & NS command to ping the client. & 28 \\
-		\texttt{QRY [24]$\backslash$r$\backslash$n[32]} & Client's response to CHL. & 60 \\
-		\texttt{QRY [2]$\backslash$r$\backslash$n} & NS's response to client's QRY. & 8 \\
-		\texttt{RNG [10] [ip:port] [19] [email] [name] [21] $\backslash$r$\backslash$n[ws]} & NS's invite to the client for new IM session. & 120 \\
+		\texttt{PNG$\backslash$r$\backslash$n} & Client command to ping the NS
+& 5 \\
+		\texttt{QNG [2]$\backslash$r$\backslash$n} & NS's response to PNG
+& 8 \\
+		\texttt{CHL [22]$\backslash$r$\backslash$n} & NS command to ping the client
+& 28 \\
+		\texttt{QRY [24]$\backslash$r$\backslash$n[32]} & Client's response to CHL
+& 60 \\
+		\texttt{QRY [2]$\backslash$r$\backslash$n} & NS's response to client's QRY
+& 8 \\
+		\texttt{RNG [10] [ip:port] [19] [email] [name] [21] $\backslash$r$\backslash$n[ws]} & NS's invite to the client for new IM session
+& 120 \\
 		\hline
 	\end{tabular}
 
@@ -252,23 +328,36 @@ No additional attacks are required to send and receive any message from the vict
 
 \section{Discussion}
 
-Our experiments demonstrate that MSNP can be successfully attacked by through ABTH. However, ABTH has several caveats.
+Our experiments demonstrate that MSNP can be successfully attacked by through ABTH
+However, ABTH has several caveats.
 
 \subsection{Limitations}
 
-In the case with WLM, it is crucial that ABTH is completed prior to the next client ping, which occurs in roughly 45 seconds. Otherwise, the client would repeatedly ping the NS and discover the imbalance in sequence numbers evntually leading to a timeout and disconnection. Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments demonstrated.
+In the case with WLM, it is crucial that ABTH is completed prior to the next client ping, which occurs in roughly 45 seconds
+Otherwise, the client would repeatedly ping the NS and discover the imbalance in sequence numbers evntually leading to a timeout and disconnection
+Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments demonstrated.
 
-ABTH requires the length of responses be greater than the commands issued to provoke them. If this was not the case, resynchronization would only widen the gap of mismatched seqnums. Similarly, application commands with similar behaviour to NOP (no operation) that do not require responses would not work either.
+ABTH requires the length of responses be greater than the commands issued to provoke them
+If this was not the case, resynchronization would only widen the gap of mismatched seqnums
+Similarly, application commands with similar behaviour to NOP (no operation) that do not require responses would not work either.
 
-Our implementation of ABTH on the MSNP protocol calculates and generates the required commands to send prior to the attack and are therefore static. If either host sends packets during the restoration phase, this would result in ABTH to fail in resynchronizing their TCP stacks. As a result, no network traffic can occur while ABTH is in the process of sending its own packets. Complex algorithms capable of adjusting to live traffic dynamically may improve this performance.
+Our implementation of ABTH on the MSNP protocol calculates and generates the required commands to send prior to the attack and are therefore static
+If either host sends packets during the restoration phase, this would result in ABTH to fail in resynchronizing their TCP stacks
+As a result, no network traffic can occur while ABTH is in the process of sending its own packets
+Complex algorithms capable of adjusting to live traffic dynamically may improve this performance.
 
 \subsection{Countermeasures}
 
-In order to properly authenticate messages, a straight-forward countermeasure against ABTH is to encrypt all application traffic, for example with SSL/TLS. However, with over 17 million unique user~\cite{templeton:spoof}, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic. In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the Mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application. As a case in point, SimpLite-MSN~\cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, thus providing protection against spoofing.
+In order to properly authenticate messages, a straight-forward countermeasure against ABTH is to encrypt all application traffic, for example with SSL/TLS
+However, with over 17 million unique user~\cite{templeton:spoof}, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic
+In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the Mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application
+As a case in point, SimpLite-MSN~\cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, thus providing protection against spoofing.
 
-As ABTH requires a pre-determined amount of spoof packets to inflate the seqnums and acknums of the hosts, intrusion detection systems (IDS) may detect this form of attack due to the sudden spike in traffic between the hosts. However, this behaviour may step within the boundaries of legitimate application traffic.
+As ABTH requires a pre-determined amount of spoof packets to inflate the seqnums and acknums of the hosts, intrusion detection systems (IDS) may detect this form of attack due to the sudden spike in traffic between the hosts
+However, this behaviour may step within the boundaries of legitimate application traffic.
 
-Furthermore, a regulatory mechanism in the application protocol, such as tagging application messages with sequence numbers, has the potential for providing integrity for each packet. By using such a mechanism, it would be difficult to inject a packet and expect further messages to be accepted as the application would keep track of the list of messages.
+Furthermore, a regulatory mechanism in the application protocol, such as tagging application messages with sequence numbers, has the potential for providing integrity for each packet
+By using such a mechanism, it would be difficult to inject a packet and expect further messages to be accepted as the application would keep track of the list of messages.
 This straightforward yet non-trivial detail also alleviates the application protocol from its dependence on the network layer and the assumption that packets on the network layer are authentic.
 
 For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network~\cite{templeton:spoof}.
@@ -276,16 +365,22 @@ However, this method would be ineffective in a wireless medium, such as WiFi.
 
 \subsection{Feasibility}
 
-Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command. Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%. As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
+Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command
+Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%
+As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
 
-In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer WiFi service, ABTH poses a threat. Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels. As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
+In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer WiFi service, ABTH poses a threat
+Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels
+As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
 
 \section{Conclusion}
 
 By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, Application-Based TCP Hijacking (ABTH) offers an elegant way of exploiting certain application protocols.
-Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command. We presented a proof of ABTH concept by successfully evaluating it against Windows Live Messenger, Microsoft's popular instant messaging application, which uses the Microsoft Notification Protocol (MSNP).
+Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command
+We presented a proof of ABTH concept by successfully evaluating it against Windows Live Messenger, Microsoft's popular instant messaging application, which uses the Microsoft Notification Protocol (MSNP).
 
-While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities. Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
+While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities
+Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
 
 \bibliographystyle{abbrv}
 \bibliography{abthmsnp}
