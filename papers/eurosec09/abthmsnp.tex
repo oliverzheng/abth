@@ -38,11 +38,11 @@ Application-Based TCP Hijacking
 \maketitle
 
 \begin{abstract}
-Application-Based TCP Hijacking (ABTH) is the technique presented in this paper that exploits flaws within the transport and application protocols to inject data into an application session without either hosts noticing the spoofing attack.
-Following the injection of a TCP packet, ABTH is used to re-synchronize the TCP stacks of both the server and the client.
-To demonstrate the effectiveness of ABTH, it will be evaluated against Windows Live Messenger where ABTH will be used to impersonate an end-user.
-Due to its generic nature, ABTH can be mounted on a variety of application protocols.
-Countermeasures to thwart and/or limit the effectiveness of ABTH include strict Ethernet switching prevention and cryptographic protection of messages.
+We present application-based TCP hijacking (ABTH), a new attack on TCP applications that exploits flaws due to the interplay between TCP and application protocols to inject data into an application session without either server or client applications noticing the spoofing attack. 
+Following the injection of a TCP packet, ABTH re-synchronizes the TCP stacks of both the server and the client. 
+To evaluate the feasibility and effectiveness of ABTH, we developed a tool that allows impersonating users of Windows Live Messenger in the matter of few seconds. 
+Due to its generic nature, ABTH can be mounted on a variety of modern protocols for TCP-based applications.
+Countermeasures to thwart and/or limit the effectiveness of ABTH could include strict Ethernet switching and cryptographic protection of messages. However, the former cannot be guaranteed by the application provider and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
 \end{abstract}
 
 \terms{Security, Theory}
@@ -53,36 +53,35 @@ Countermeasures to thwart and/or limit the effectiveness of ABTH include strict 
 
 Since its first specification in 1974~\cite{rfc:tcp}, the Transmission Control Protocol (TCP) has grown to become the core transport protocol for a vast number of applications including HTTP, FTP, SMTP, and TELNET.
 The security properties of these application protocols are partially dependent on the security of TCP and the underlying Internet Protocol (IP).
-Many network attacks have shown prominence over the past decades in regards to vulnerabilities of the TCP design~\cite{harris:tcpattacks}.
+Many network attacks that exploit vulnerabilities of the TCP design have shown prominence over the past decades~\cite{harris:tcpattacks}.
 While preventive mechanisms have been developed to throttle or outright eliminate most of these attacks~\cite{dubrawsky:layer2}, the list of TCP vulnerabilities continues to grow.
 
-\begin{sloppypar}
-In this paper, we will present Application-Based TCP Hijacking (ABTH), a new technique in attacking a TCP-based communication.
+In this paper, we present application-based TCP hijacking (ABTH), a new technique for attacking TCP-based communications.
 ABTH extends TCP hijacking~\cite{stamp:infosec} by meddling with application-layer protocols.
 Traditional TCP hijacking attacks exploit vulnerabilities of the transport and network layers.
 However, the majority of these attacks have been circumvented through the use of hardware switches and routers~\cite{dubrawsky:layer2}, which provide countermeasures against these direct low-level attacks.
-On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement for the transport and IP layers.
+On the other hand, ABTH utilizes loopholes in the logistics of application-level communication to evade policy enforcement at the transport and IP layers.
 Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
-\end{sloppypar}
 
 To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented.
 With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks.
-By attacking the Microsoft Notification Protocol (MSNP) with ABTH, the privacy and confidentialiy of WLM users will be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
+By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentialiy of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various contacts.
-Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results.
+Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results. We contacted Microsoft about the vulnerability of MSNP against ABTH in the spring of 2008. As of September 2008, they were still ``looking at it.'' 
 Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 
-Among several ways to circumvent ABTH, application protocols could encrypt packets and thus put off TCP security exploits.
-Internet service providers (ISPs) could employ stricter security controls on the network layer.
+Among several ways to circumvent ABTH, Internet service providers (ISPs) could employ stricter security controls on the network layer. TCP applications could also employ TLS or other forms of data confidentiality and integrity protection.
+However, the former cannot be guaranteed by the application provider(s) and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
 
 The remainder of the paper is organized as follows.
-Relevant background information on TCP and existing attacks on the transport protocol are discussed in Section 2.
-The theory and general operation of ABTH is described in Section 3.
-The applicability of ABTH on MSNP is demonstrated in Section 4.
-The limitations of ABTH and countermeasures against it are discussed in Section 5.
-The paper is concluded in Section 6.
+Relevant background information on TCP and existing attacks on the transport protocol are discussed in Section~\ref{sec:background}.
+The theory and general operation of ABTH is described in Section~\ref{sec:abth}.
+The feasibility of ABTH for MSNP is demonstrated in Section~\ref{sec:casestudy}.
+The limitations of ABTH and countermeasures against it are discussed in Section~\ref{sec:discussion}.
+The paper is concluded in Section~\ref{sec:conclusion}.
 
 \section{Background and Related Work}
+\label{sec:background}
 
 In this section, necessary background information on TCP including the details of existing security flaws are also presented.
 
@@ -159,6 +158,7 @@ However, slightly more experienced users will easily detect such a peculiarity a
 As discussed, existing attacks on TCP do not provide much guarantee for an attack to be executed unnoticed.
 
 \section{Application-Based TCP Hijacking}
+\label{sec:abth}
 
 ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection.
 It is a specific way of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer.
@@ -344,6 +344,7 @@ The victim would not recognize such imposture, as the victim cannot differentiat
 No additional attacks are required to send and receive any message from the victim as the impersonated user.
 
 \section{Discussion}
+\label{sec:discussion}
 
 Our experiments demonstrate that MSNP can be successfully attacked by through ABTH.
 However, ABTH has several caveats.
@@ -391,6 +392,7 @@ Application protocols vulnerable to ABTH, such as MSNP, were not designed to off
 As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
 
 \section{Conclusion}
+\label{sec:conclusion}
 
 By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, Application-Based TCP Hijacking (ABTH) offers an elegant way of exploiting certain application protocols.
 Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command.
