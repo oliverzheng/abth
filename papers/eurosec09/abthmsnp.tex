@@ -39,7 +39,7 @@ Application-Based TCP Hijacking
 
 \begin{abstract}
 We present application-based TCP hijacking (ABTH), a new attack on TCP applications that exploits flaws due to the interplay between TCP and application protocols to inject data into an application session without either server or client applications noticing the spoofing attack. 
-Following the injection of a TCP packet, ABTH re-synchronizes the TCP stacks of both the server and the client. 
+Following the injection of a TCP packet, ABTH re-synchronizes the TCP stacks of both the server and the client.
 To evaluate the feasibility and effectiveness of ABTH, we developed a tool that allows impersonating users of Windows Live Messenger in the matter of few seconds. 
 Due to its generic nature, ABTH can be mounted on a variety of modern protocols for TCP-based applications.
 Countermeasures to thwart and/or limit the effectiveness of ABTH could include strict Ethernet switching and cryptographic protection of messages. However, the former cannot be guaranteed by the application provider and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
@@ -67,10 +67,13 @@ To demonstrate the feasibility and effectiveness of ABTH, a case study attacking
 With instant messaging (IM) quickly becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks.
 By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentialiy of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various contacts.
-Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results. We contacted Microsoft about the vulnerability of MSNP against ABTH in the spring of 2008. As of September 2008, they were still ``looking at it.'' 
+Such an attack could result in at a minimum, user inconveniences or embarrassment, but in extreme cases it could lead to much more devastating results.
+We contacted Microsoft about the vulnerability of MSNP against ABTH in the spring of 2008.
+As of September 2008, they were still ``looking at it.'' 
 Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 
-Among several ways to circumvent ABTH, Internet service providers (ISPs) could employ stricter security controls on the network layer. TCP applications could also employ TLS or other forms of data confidentiality and integrity protection.
+Among several ways to circumvent ABTH, Internet service providers (ISPs) could employ stricter security controls on the network layer.
+TCP applications could also employ TLS or other forms of data confidentiality and integrity protection.
 However, the former cannot be guaranteed by the application provider(s) and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
 
 The remainder of the paper is organized as follows.
@@ -169,7 +172,7 @@ The technique assumes the following adversary model.
 \label{sec:adversarymodel}
 
 The main assumption about the adversary is that they are able to listen to network traffic of a TCP session and inject spoofed packets into the network.
-We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack, delete or reroute network traffic
+We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack, delete or reroute network traffic.
 Sniffing and spoofing are limited in wired networks.
 For example, network switches prevent sniffing in Ethernet and it is usually very hard to sniff on routers.
 Internet service providers (ISPs) and enterprises often use network access control to block IP spoofing.
@@ -382,6 +385,11 @@ For network service providers, the most effective method to disable ABTH and mes
 However, this method would be ineffective in a wireless medium, such as WiFi.
 
 \subsection{Feasibility}
+
+% Format: \graph[gridlines]{formula}{xMin}{xMax}{yMin}{yMax}
+\graph[12]{(x-1)(x+3)}{-6}{6}{-6}{6}}
+% The choice of gridlines and scale here will ensure that the axes are
+% labeled at the integers -6, -5, ..., -1, 1, ..., 5, 6.
 
 Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command.
 Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%.
