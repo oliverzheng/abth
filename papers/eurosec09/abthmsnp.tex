@@ -217,23 +217,19 @@ WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers wi
 The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication.
 The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
 
-When a user logs into their WLM account, a persistent TCP connection to the NS is opened.
+When a user logs into their WLM account, a persistent TCP connection to the NS is opened.  
 This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service.
 
-This connection is used to transmit information regarding a user's contact list and presence information (e.g.
-user status, email notification).
-The NS also setups sends information regarding mixer servers, which relays all IM sessions between clients.
-
+Through the connection with the NS, control packets are transmitted to the user. 
+Control packets include a user's contact list and presence information (e.g. user status, email notification).
+The NS also setups sends information regarding mixer servers, which relays content packets between clients. 
+Content packets consist of all messages sent between WLM clients through the mixer such as instant messages.
 
 \begin{figure}[h]
 	\centering
 	\caption{.NET Messenger Service Infrastructure}
 	\label{fig:wlminfrastructure}
-	\xymatrix {
-		\framebox{Notification Server} \ar@{<->}[d] & \framebox{Notification Server} \ar@{<->}[d] \\
-		\framebox{WLM Client 1} \ar@{<->}[d] & \framebox{WLM Client 2} \ar@{<->}[ld] \\
-		\framebox{Mixer Server} & \\
-	}
+    \includegraphics{graphics/Infrastructure.eps}
 \end{figure}
 
 \subsection{Microsoft Notification Protocol}
@@ -385,11 +381,6 @@ For network service providers, the most effective method to disable ABTH and mes
 However, this method would be ineffective in a wireless medium, such as WiFi.
 
 \subsection{Feasibility}
-
-% Format: \graph[gridlines]{formula}{xMin}{xMax}{yMin}{yMax}
-\graph[12]{(x-1)(x+3)}{-6}{6}{-6}{6}}
-% The choice of gridlines and scale here will ensure that the axes are
-% labeled at the integers -6, -5, ..., -1, 1, ..., 5, 6.
 
 Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command.
 Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%.
