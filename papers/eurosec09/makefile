@@ -9,7 +9,7 @@ abthmsnp.pdf: $(FILE).ps
 abthmsnp.ps: $(FILE).dvi
 	dvips $(FILE).dvi
 
-abthmsnp.dvi: $(FILE).tex
+abthmsnp.dvi: $(FILE).tex graphics/infrastructure.eps graphics/plot.eps
 	latex $(FILE)
 	bibtex $(FILE)
 	latex $(FILE)

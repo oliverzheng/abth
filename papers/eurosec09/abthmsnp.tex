@@ -229,7 +229,7 @@ Content packets consist of all messages sent between WLM clients through the mix
 	\centering
 	\caption{.NET Messenger Service Infrastructure}
 	\label{fig:wlminfrastructure}
-    \includegraphics{graphics/Infrastructure.eps}
+	\includegraphics{graphics/Infrastructure.eps}
 \end{figure}
 
 \subsection{Microsoft Notification Protocol}
@@ -383,8 +383,17 @@ However, this method would be ineffective in a wireless medium, such as WiFi.
 \subsection{Feasibility}
 
 Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command.
-Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%.
+In order for the attack to succeed, no network traffic can occur within these 2 seconds.
+Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%, as shown in Figure~\ref{fig:successrate}.
+With the statistics we have gathered, it seems that success rate of an ABTH attack has no relevance to the number of contacts online and thus the amount of network traffic.
 As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
+
+\begin{figure}[h]
+	\centering
+	\caption{Success Rate of ABTH attack vs the number of contacts online.}
+	\label{fig:successrate}
+	\includegraphics[width=\columnwidth]{graphics/plot.eps}
+\end{figure}
 
 In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer WiFi service, ABTH poses a threat.
 Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
