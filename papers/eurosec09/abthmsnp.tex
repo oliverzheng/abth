@@ -215,7 +215,7 @@ WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers wi
 \subsection{.NET Messenger Service}
 
 The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication.
-The service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
+As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
 
 When a user logs into their WLM account, a persistent TCP connection to the NS is opened.  
 This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service.
