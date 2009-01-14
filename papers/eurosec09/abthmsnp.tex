@@ -215,15 +215,7 @@ WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers wi
 \subsection{.NET Messenger Service}
 
 The .Net Messenger Service provides WLM clients with instant messanging and presence services that are required for user-to-user communication.
-As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers within this cluster include the notification servers (NS) and mixer servers~\cite{torre:wlm}.
-
-When a user logs into their WLM account, a persistent TCP connection to the NS is opened.  
-This connection must always remain active; a lost connection will result in the client being logged out and disconnected from the messaging service.
-
-Through the connection with the NS, control packets are transmitted to the user. 
-Control packets include a user's contact list and presence information (e.g. user status, email notification).
-The NS also setups sends information regarding mixer servers, which relays content packets between clients. 
-Content packets consist of all messages sent between WLM clients through the mixer such as instant messages.
+As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers exist within this cluster: notification servers (NS) and mixer servers~\cite{torre:wlm}.
 
 \begin{figure}[h]
 	\centering
@@ -232,13 +224,16 @@ Content packets consist of all messages sent between WLM clients through the mix
 	\includegraphics{graphics/Infrastructure.eps}
 \end{figure}
 
+When a user logs into their WLM account, a persistent TCP connection to the NS is established.
+This connection must always remain active for the lifetime of the session; a lost connection will result in the client being logged out and disconnected from the messaging service, which is reflected on the contact lists of the user's contacts.
+
+Through the connection with the NS, control packets are transmitted to and from the user. 
+Control packets include a user's contact list and presence information (e.g., user status, email notification).
+The NS also sends information regarding mixer servers, which relays content packets between clients. 
+Content packets consist of all messages sent between WLM clients through the mixer such as instant messages.
+If user 1 attempts to talk to user 2, user 2 will receive from the connected NS the location of a mixer server, to which user 2 needs to connect in order to receive messages from user 1.
+
 \subsection{Microsoft Notification Protocol}
-
-MSNP is a text-based application protocol used for communication between WLM clients and servers.
-Although the protocol was first intended to be an open standard~\cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
-However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful~\cite{hypothetic:msnp, msnfanatic:msnp}.
-
-The protocol consists of plain text commands; each MSNP command is prefixed with three capital letters (e.g., command PNG represents ping).
 
 \begin{table*}[tbp]
 	\centering
@@ -251,50 +246,50 @@ The protocol consists of plain text commands; each MSNP command is prefixed with
 		\hline
 		\textbf{Command} & \textbf{Description} & \textbf{Size} \\
 		\hline
-		\texttt{PNG$\backslash$r$\backslash$n} & Client command to ping the NS.
-& 5 \\
-		\texttt{QNG [2]$\backslash$r$\backslash$n} & NS's response to PNG.
-& 8 \\
-		\texttt{CHL [22]$\backslash$r$\backslash$n} & NS command to ping the client.
-& 28 \\
-		\texttt{QRY [24]$\backslash$r$\backslash$n[32]} & Client's response to CHL.
-& 60 \\
-		\texttt{QRY [2]$\backslash$r$\backslash$n} & NS's response to client's QRY.
-& 8 \\
-		\texttt{RNG [10] [ip:port] [19] [email] [name] [21] $\backslash$r$\backslash$n[ws]} & NS's invite to the client for new IM session.
-& 120 \\
+		\texttt{PNG$\backslash$r$\backslash$n} & Client command to ping the NS. & 5 \\
+		\texttt{QNG [2]$\backslash$r$\backslash$n} & NS's response to PNG. & 8 \\
+		\texttt{CHL [22]$\backslash$r$\backslash$n} & NS command to ping the client. & 28 \\
+		\texttt{QRY [24]$\backslash$r$\backslash$n[32]} & Client's response to CHL. & 60 \\
+		\texttt{QRY [2]$\backslash$r$\backslash$n} & NS's response to client's QRY. & 8 \\
+		\texttt{RNG [10] [ip:port] [19] [email] [name] [21] $\backslash$r$\backslash$n[ws]} & NS's invite to the client for new IM session. & 120 \\
 		\hline
 	\end{tabular}
 
 	\begin{flushleft}
-	Irrelevant parts of commands are denoted using the following notation:
+	Parts of commands are denoted using the following notation:
+
 	\begin{itemize}
-		\item {[\#]} is an integer or string of n characters wide;
+		\item {[\#]} is an integer or string of \# characters wide, irrelevant for the context of ABTH;
 		\item {[ip:port]} is the IP address and TCP port of the mixer server;
 		\item {[email]} is the email address of the user to be impersonated;
 		\item {[name]} is the name of the user to be impersonated;
 		\item {[ws]} is a variable length of whitespace padded to the command by the attacker.
 	\end{itemize}
 	\end{flushleft}
-
 \end{table*}
 
+MSNP is a text-based application protocol used for communication between WLM clients and servers.
+Although the protocol was first intended to be an open standard~\cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
+However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful~\cite{hypothetic:msnp, msnfanatic:msnp}.
+
+The protocol consists of plain text commands; each MSNP command is prefixed with three capital letters (e.g., command \texttt{PNG} represents ping).
+
 To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bi-directional pings; both the WLM client and the NS have the ability to initiate a ping.
-The client pings the NS with PNG; the NS pings the client with CHL.
+The client pings the NS with \texttt{PNG}; the NS pings the client with \texttt{CHL}.
 Both pings provoke responses, which must be sent to prevent disconnection from the messaging service.
 WLM, the official MSNP IM application, pings the NS every 45 seconds whereas in alternative IM clients such as Pidgin~\cite{pidgin:url}, ping the NS every 30 seconds.
 Table~\ref{tab:commandlist} specifies the structure of those MSNP commands that are relevant to our ABTH attack on MSNP.
-Note that the ping-response initiated by the NS entails three transactions (CHL-QRY-QRY).
+Note that the ping-response initiated by the NS entails three transactions (\texttt{CHL}-\texttt{QRY}-\texttt{QRY}).
 
 An attacker can inject an MSNP command by listening to the TCP traffic.
 Afterwards, ABTH can exploit these two sets of ping-response commands to eliminate the discrepancy between the seqnums and acknums of the client and the NS created by the spoof packet.
 Completion of ABTH will circumvent disconnection and detection of a spoofed packet.
-MSNP specification's allows whitespace padding after commands.
-This ability to artificially inflate packet simplifies ABTH calculations and reduces the number of packets necessary to resynchronize the TCP connection.
+The fact that MSNP allows whitespace padding after commands allows for artificially inflated seqnums, simplifies ABTH calculations, and reduces the number of packets necessary to resynchronize the TCP connection.
 
-In order to demonstrate the feasibility of ABTH, the follow sections demonstrate the spoofing of an MSNP command without disconnecting the client.
+In order to demonstrate the feasibility of ABTH, the follow section demonstrates the spoofing of an MSNP command without disconnecting the client.
 The spoofed command creates the effect of identity impersonation.
 The attack uses the official WLM client and the live .NET Messaging Service, as well as a a custom-made rogue WLM mixer server to which the WLM client connects.
+Thus, scope of the attack is confined within the TCP connection between the NS and the user.
 
 \subsection{Identity Spoofing}
 
@@ -351,12 +346,12 @@ However, ABTH has several caveats.
 \subsection{Limitations}
 
 In the case with WLM, it is crucial that ABTH is completed prior to the next client ping, which occurs in roughly 45 seconds.
-Otherwise, the client would repeatedly ping the NS and discover the imbalance in sequence numbers evntually leading to a timeout and disconnection.
-Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments demonstrated.
+Otherwise, the client would repeatedly ping the NS and discover the imbalance in seqnums, eventually leading to a timeout and disconnection.
+Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments demonstrated, later described in the feasibility section.
 
 ABTH requires the length of responses be greater than the commands issued to provoke them.
 If this was not the case, resynchronization would only widen the gap of mismatched seqnums.
-Similarly, application commands with similar behaviour to NOP (no operation) that do not require responses would not work either.
+Likewise, application commands with similar behaviour to NOP (no operation) that do not provoke responses would not work either.
 
 Our implementation of ABTH on the MSNP protocol calculates and generates the required commands to send prior to the attack and are therefore static.
 If either host sends packets during the restoration phase, this would result in ABTH to fail in resynchronizing their TCP stacks.
@@ -367,25 +362,26 @@ Complex algorithms capable of adjusting to live traffic dynamically may improve 
 
 In order to properly authenticate messages, a straight-forward countermeasure against ABTH is to encrypt all application traffic, for example with SSL/TLS.
 However, with over 17 million unique user~\cite{templeton:spoof}, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic.
-In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the Mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application.
+In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application.
 As a case in point, SimpLite-MSN~\cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, thus providing protection against spoofing.
 
-As ABTH requires a pre-determined amount of spoof packets to inflate the seqnums and acknums of the hosts, intrusion detection systems (IDS) may detect this form of attack due to the sudden spike in traffic between the hosts.
+As ABTH requires a predetermined number of spoof packets to inflate the seqnums and acknums of the hosts, intrusion detection systems (IDS) may detect this form of attack due to the sudden spike in traffic between the hosts.
 However, this behaviour may step within the boundaries of legitimate application traffic.
 
 Furthermore, a regulatory mechanism in the application protocol, such as tagging application messages with sequence numbers, has the potential for providing integrity for each packet.
-By using such a mechanism, it would be difficult to inject a packet and expect further messages to be accepted as the application would keep track of the list of messages.
+With such a mechanism, it would be difficult to inject a packet and expect further messages to be accepted as the application keeps track of the list of messages.
 This straightforward yet non-trivial detail also alleviates the application protocol from its dependence on the network layer and the assumption that packets on the network layer are authentic.
 
-For network service providers, the most effective method to disable ABTH and message spoofing all together would be to restrict IP packets containing designated source IP addresses for each port of a switched network~\cite{templeton:spoof}.
+For network service providers, the most effective method to disable ABTH and message spoofing all together would be to prohibit IP packets with forged source IP addresses~\cite{templeton:spoof}.
 However, this method would be ineffective in a wireless medium, such as WiFi.
 
 \subsection{Feasibility}
 
-Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the receiving of a MSNP PNG command.
+Our particular implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the reception of a MSNP \texttt{PNG} command.
 In order for the attack to succeed, no network traffic can occur within these 2 seconds.
 Although the amount of MSNP traffic varies depending on the time of day, number of contacts, and other factors, the logs obtained through monitoring several days of network traffic have concluded that probability of network traffic occurring within 2 seconds of a ping is less than 5\%, as shown in Figure~\ref{fig:successrate}.
 With the statistics we have gathered, it seems that success rate of an ABTH attack has no relevance to the number of contacts online and thus the amount of network traffic.
+(This could be due to the fact that \texttt{PNG}s are not sent until after 45 seconds of network inactivity, at which point the amount of network traffic has very little influence.)
 As such, ABTH would prevail over 95\% of the time, a large concern for potential threat.
 
 \begin{figure}[h]
@@ -402,9 +398,9 @@ As such, it is imperative that, as protocols become more widely adopted, they ar
 \section{Conclusion}
 \label{sec:conclusion}
 
-By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, Application-Based TCP Hijacking (ABTH) offers an elegant way of exploiting certain application protocols.
-Sending commands to both hosts to provoke responses allows an attacker to create a gap of a certain size in TCP sequence numbers to inject a malicious command.
-We presented a proof of ABTH concept by successfully evaluating it against Windows Live Messenger, Microsoft's popular instant messaging application, which uses the Microsoft Notification Protocol (MSNP).
+By combining the innocuous features of the transport and application layers and the lack of cryptographic protection at either layer, Application-Based TCP Hijacking (ABTH) offers a clean way of exploiting certain application protocols.
+Sending commands to both hosts to provoke responses allows an attacker to create a gap in TCP sequence numbers of a size exactly large enough for the injection of a malicious command.
+We presented a proof of the ABTH concept by successfully evaluating it against Windows Live Messenger, Microsoft's popular instant messaging application, which uses the Microsoft Notification Protocol (MSNP).
 
 While some protocols, such as MSNP, were designed to suit flexible environments, as the environment evolved, these features have become subtle vulnerabilities.
 Although hardware Ethernet equipment has been updated to obstruct lower level attacks (e.g., ARP poisoning), the realm of attacks is reaching beyond the protection capabilities of network devices.
