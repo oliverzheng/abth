@@ -212,27 +212,6 @@ WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers wi
 
 \subsection{.NET Messenger Service}
 
-The .Net Messenger Service provides WLM clients with instant messaging and presence services that are required for user-to-user communication.
-As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers exist within this cluster: notification servers (NS) and mixer servers (MS)~\cite{torre:wlm}.
-
-\begin{figure}[h]
-	\centering
-	\caption{.NET Messenger Service Infrastructure}
-	\label{fig:wlminfrastructure}
-	\includegraphics{graphics/Infrastructure.eps}
-\end{figure}
-
-When a user logs into their WLM account, a persistent TCP connection to the NS is established.
-This connection must always remain active for the lifetime of the session; a lost connection will result in the client being logged out and disconnected from the messaging service.
-Control packets are transmitted between the NS and the user via the persistent connection and include information such as a user's contact list and presence information (e.g., user status, email notification).
-
-In addition to transmitting control packets, the NS also sends information to the user regarding the MS.
-For instance, if user 1 attempts to talk to user 2, user 2 will receive, from the connected NS, the location of a mixer server to which user 2 needs to connect in order to receive messages from user 1.
-Participants to a IM conversation are connected to the same MS where the MS relays content packets between clients.
-Content packets consist of all messages sent between WLM clients through the mixer such as instant messages.
-
-\subsection{Microsoft Notification Protocol}
-
 \begin{table*}[tbp]
 	\centering
 
@@ -266,17 +245,38 @@ Content packets consist of all messages sent between WLM clients through the mix
 	\end{flushleft}
 \end{table*}
 
+The .Net Messenger Service provides WLM clients with instant messaging and presence services that are required for user-to-user communication.
+As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers exist within this cluster: notification servers (NS) and mixer servers (MS)~\cite{torre:wlm}.
+
+\begin{figure}[h]
+	\centering
+	\caption{.NET Messenger Service Infrastructure}
+	\label{fig:wlminfrastructure}
+	\includegraphics{graphics/Infrastructure.eps}
+\end{figure}
+
+When a user logs into their WLM account, a persistent TCP connection to a NS is established.
+This connection must always remain active for the lifetime of the session; a lost connection will result in the client being logged out and disconnected from the messaging service.
+Control packets are transmitted between the NS and the user via the persistent connection and include information such as a user's contact list and presence information (e.g., user status, email notification).
+
+In addition to transmitting control packets, the NS also sends information to the user regarding MS's.
+For instance, if user 1 attempts to talk to user 2, user 2 will receive, from the connected NS, the location of an MS to which user 2 needs to connect in order to receive messages from user 1.
+Participants of an IM conversation are connected to the same MS where the MS relays content packets between clients.
+Content packets consist of all messages sent between WLM clients through the mixer such as instant messages.
+
+\subsection{Microsoft Notification Protocol}
+
 MSNP is a text-based application protocol that defines the communication between WLM clients and servers.
 Although the protocol was first intended to be an open standard~\cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
 However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful~\cite{hypothetic:msnp, msnfanatic:msnp}.
 
 The protocol consists of plain text commands; each command is prefixed with three capital letters (e.g., command \texttt{PNG} represents ping).
 
-To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bi-directional pings; both the WLM client and the NS have the ability to initiate a ping.
+To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bidirectional pings; both the WLM client and the NS have the ability to initiate a ping.
 The client pings the NS with \texttt{PNG}; the NS pings the client with \texttt{CHL}.
 Both pings provoke responses from the receiving host. 
 If a response is not received, the client will be disconnected from the messaging service.
-WLM pings the NS every 45 seconds whereas in alternative IM clients, such as Pidgin~\cite{pidgin:url}, pings the NS every 30 seconds.
+WLM pings the NS every 45 seconds whereas in alternative IM clients, such as Pidgin~\cite{pidgin:url}, pings occur every 30 seconds.
 Table~\ref{tab:commandlist} specifies the structure of MSNP commands that are relevant to our ABTH attack on MSNP.
 Note that the ping-response initiated by the NS entails three transactions (\texttt{CHL}-\texttt{QRY}-\texttt{QRY}).
 
@@ -287,21 +287,9 @@ The fact that MSNP allows whitespace padding after commands can be leveraged to 
 
 In order to demonstrate the feasibility of ABTH, the following section demonstrates the spoofing of an MSNP command without disconnecting the client.
 The spoofed command creates the effect of identity impersonation.
-The attack uses the official WLM client and the live .NET Messaging Service, as well as a a custom-made rogue WLM mixer server to which the WLM client connects.
+The attack uses the official WLM client and the live .NET Messaging Service, as well as a custom-made rogue WLM mixer server to which the WLM client connects.
 
 \subsection{Identity Spoofing}
-
-When TCP seqnums are synchronized, NS acknum should match client seqnum and client acknum should match NS seqnum, as shown in the first row of Table~\ref{tab:identityspoof}.
-The \texttt{RNG} command specifies two items of interest that will be used for identity spoofing: the address of a MS and the email and name of the user to impersonate.
-Upon receiving the \texttt{RNG} command, the user will connect to the specified MS to join an IM conversation with the user whose name and email was denoted in the command.
-
-An attacker can inject a \texttt{RNG} command specifying the address of a rogue MS and the user to impersonate.
-Upon receiving the \texttt{RNG} command, the victim's WLM client will open a new TCP connection to the MS.
-Although the injection of the \texttt{RNG} packet has caused the seqnums and acknums of the victim's WLM client and the NS to become desynchronized, the connection can be resynchronized with ABTH.
-
-As described in the first row of Table~\ref{tab:identityspoof}, let us assume that the seqnums of the client and the NS are 100 and 500, respectively, prior to the spoofed packet.
-While the seqnums of the NS and the client cannot be controlled, pings can provoke responses that can be used to inflate the seqnums of one end of the connection.
-Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
 \begin{table*}[tbp]
 	\centering
@@ -331,6 +319,18 @@ Each command is sent or received by the attacker in the order listed in Table~\r
 		\multicolumn{4}{l}{\textbf{After ABTH}} & 220 & 692 & 692 & 220 \\
 	\end{tabular}
 \end{table*}
+
+When TCP seqnums are synchronized, NS acknum should match client seqnum and client acknum should match NS seqnum, as shown in the first row of Table~\ref{tab:identityspoof}.
+The \texttt{RNG} command specifies two items of interest that will be used for identity spoofing: the address of an MS and the email and name of the user to impersonate.
+Upon receiving the \texttt{RNG} command, the user will connect to the specified MS to join an IM conversation with the user whose name and email was denoted in the command.
+
+An attacker can inject a \texttt{RNG} command specifying the address of a rogue MS and the user to impersonate.
+Upon receiving the \texttt{RNG} command, the victim's WLM client will open a new TCP connection to the MS.
+Although the injection of the \texttt{RNG} packet has caused the seqnums and acknums of the victim's WLM client and the NS to become desynchronized, the connection can be resynchronized with ABTH.
+
+As described in the first row of Table~\ref{tab:identityspoof}, let us assume that the seqnums of the client and the NS are 100 and 500, respectively, prior to the spoofed packet.
+While the seqnums of the NS and the client cannot be controlled, pings can provoke responses that can be used to inflate the seqnums of one end of the connection.
+Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
 As the last row of Table~\ref{tab:identityspoof} shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and has successfully resynchronized the TCP connection.
 The connection is now is ready to transmit further legitimate and/or illegitimate packets.
@@ -376,7 +376,7 @@ With such a mechanism, it would be difficult to inject a packet and expect furth
 This straightforward yet non-trivial detail also alleviates the application protocol from its dependence on the network layer and the assumption that packets on the network layer are authentic.
 
 For network service providers, the most effective method to disable ABTH and message spoofing all together would be to prohibit IP packets with forged source IP addresses~\cite{templeton:spoof}.
-However, this method would be ineffective in a wireless medium, such as WiFi.
+However, this method would be ineffective in an unencrypted wireless medium, such as WiFi, commonly found in coffee shops.
 
 \subsection{Feasibility}
 
@@ -384,7 +384,7 @@ Our particular implementation of ABTH on MSNP completes within roughly 2 seconds
 In order for the attack to succeed, no network traffic can occur within these 2 seconds.
 Although the amount of MSNP traffic is dependent on a variety of factors such as the time of day and number of contacts, the logs obtained through monitoring several days of network traffic have concluded that the probability of MSNP traffic occurring within 2 seconds of a ping is less than 5\% regardless of the number of contacts online on the contact list, as can be seen in Figure~\ref{fig:successrate}.
 The amount of possible MSNP traffic is directly dependent on the number of contacts in your contact list (i.e., the more contacts in your contact list, the more likely it is that you'll receive a message or a presence change). 
-However, as the success rate does not vary with the number of online contacts, we can infer that the success rate is also not dependent on the MSNP traffic.
+However, as the success rate does not vary with the number of online contacts, we can infer that the success rate is independent of the amount of MSNP traffic.
 This could be due to the fact that \texttt{PNG}s are only sent following 45 seconds of network inactivity, at which point the amount of MSNP traffic is at a minimum.
 
 \begin{figure}[h]
@@ -394,7 +394,7 @@ This could be due to the fact that \texttt{PNG}s are only sent following 45 seco
 	\includegraphics[width=\columnwidth]{graphics/plot.eps}
 \end{figure}
 
-In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer WiFi service, ABTH poses a threat.
+In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer unencrypted WiFi service, ABTH poses a threat.
 Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
 As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
 
