@@ -1,5 +1,5 @@
 % abthmsnp.tex
-% Application-based TCP Hijacking
+% Application-Based TCP Hijacking
 % Author: Oliver Zheng / Jason Poon / Konstantin Beznosov
 
 \documentclass{sig-alternate}
@@ -39,10 +39,11 @@ Application-Based TCP Hijacking
 
 \begin{abstract}
 We present application-based TCP hijacking (ABTH), a new attack on TCP applications that exploits flaws due to the interplay between TCP and application protocols to inject data into an application session without either server or client applications noticing the spoofing attack. 
-Following the injection of a TCP packet, ABTH re-synchronizes the TCP stacks of both the server and the client.
+Following the injection of a TCP packet, ABTH resynchronizes the TCP stacks of both the server and the client.
 To evaluate the feasibility and effectiveness of ABTH, we developed a tool that allows impersonating users of Windows Live Messenger in the matter of few seconds. 
 Due to its generic nature, ABTH can be mounted on a variety of modern protocols for TCP-based applications.
-Countermeasures to thwart and/or limit the effectiveness of ABTH could include strict Ethernet switching and cryptographic protection of messages. However, the former cannot be guaranteed by the application provider and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
+Countermeasures to thwart and/or limit the effectiveness of ABTH could include strict Ethernet switching and cryptographic protection of messages.
+However, the former cannot be guaranteed by the application provider and the latter appears to be still prohibitively expensive for such large-scale applications with hundreds of millions of sporadic users as Windows Live Messenger.
 \end{abstract}
 
 \terms{Security, Theory}
@@ -64,11 +65,10 @@ On the other hand, ABTH utilizes loopholes in the logistics of application-level
 Trivial design features of application protocols become fatal vulnerabilities that can be exploited by ABTH.
 
 To demonstrate the feasibility and effectiveness of ABTH, a case study attacking the communications of Microsoft Windows Live Messenger (WLM) is presented.
-With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, WLM represents one of the largest IM networks.
-By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentialiy of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
+With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, Windows Live Messenger (WLM) represents one of the largest IM networks.
+By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentiality of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various contacts.
-We contacted Microsoft about the vulnerability of MSNP against ABTH in the spring of 2008.
-As of September 2008, they were still ``looking at it.'' 
+We contacted Microsoft about the vulnerability of MSNP against ABTH in the spring of 2008; the subject matter is still under investigation as of September 2008.
 Although the reported case study is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 
 Among several ways to circumvent ABTH, Internet service providers (ISPs) could employ stricter security controls on the network layer.
@@ -78,8 +78,8 @@ However, the former cannot be guaranteed by the application provider(s) and the 
 The remainder of the paper is organized as follows.
 Relevant background information on TCP and existing attacks on the transport protocol are discussed in Section~\ref{sec:background}.
 The theory and general operation of ABTH is described in Section~\ref{sec:abth}.
-The feasibility of ABTH for MSNP is demonstrated in Section~\ref{sec:casestudy}.
-The limitations of ABTH and countermeasures against it are discussed in Section~\ref{sec:discussion}.
+The application of ABTH for MSNP is demonstrated in Section~\ref{sec:casestudy}.
+The limitations of ABTH and countermeasures against it as well as its feasibility are discussed in Section~\ref{sec:discussion}.
 The paper is concluded in Section~\ref{sec:conclusion}.
 
 \section{Background and Related Work}
@@ -95,7 +95,7 @@ Each end of the connection is identified by an Internet Protocol (IP) address an
 
 Each TCP packet is tagged with a sequence number, an acknowledgement number, and a receive window, herein referred to as seqnum, acknum, and rcvwnd, respectively.
 seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing.
-Within each TCP header are also 8 control bits or flags.
+Within each TCP header are also 8 control flags.
 Packets containing data have the SYN and ACK flags set; packets with no data only have the ACK flag set to denote an empty acknowledgement packet.
 For each data packet that is sent, an acknowledgement packet has to be received to affirm packet delivery.
 A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
@@ -108,17 +108,20 @@ If the client sends a data packet of 10 bytes, the client seqnum increases to 60
 
 When either hosts receives a packet containing an unexpected seqnum two scenarios may occur.
 If the received seqnum is within the range of the expected seqnum and the rcvwnd (the packet received arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent.
-(An acknowledgement packet would confirm the reception of the missing packet.) Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{anderson:ackstorm} which is, in the persepective of an attacker, an undesirable effect.
+(An acknowledgement packet would confirm the reception of the missing packet.)
+Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{anderson:ackstorm}, which is, in the perspective of an attacker, an undesirable effect.
 
 \subsection{Adversary Model}
 \label{sec:adversarymodel}
 
-The main assumption about the adversary is that attackers are able to listen to network traffic of a TCP session and inject spoofed packets into the network.
-We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack, delete or reroute network traffic.
-Sniffing and spoofing are limited in wired networks.
+For the TCP attacks to follow as well as ABTH, the main assumption is that attackers are able to listen to network traffic of a TCP session and inject spoofed packets into the network.
+We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack or deleting or rerouting network traffic.
+
+In wired networks, sniffing and spoofing may be very limited.
 For example, network switches prevent sniffing in Ethernet and it is usually very hard to sniff on routers.
 Internet service providers (ISPs) and enterprises often use network access control to block IP spoofing.
-However, in wireless networks, especially in 802.11 networks, sniffing and spoofing can be done with well designed software and off-the-shelf hardware.
+However, in wireless networks, especially in unencrypted 802.11 networks, sniffing and spoofing can be done with well designed software and off-the-shelf hardware.
+
 Computational capabilities of the attacker do not go beyond the limits of a consumer-level personal computer.
 For example, in our implementation of of ABTH for Windows Live Messenger, the victim was attacked in the matter of two seconds with the use of a modest laptop.
 
@@ -131,18 +134,18 @@ All of these attacks, including ABTH, assume the threat model defined in Section
 \subsubsection{TCP Hijacking}
 
 By eavesdropping on a TCP session, an attacker is able to observe and calculate the expected seqnums and acknums of both hosts and is therefore able to inject a spoofed TCP packet~\cite{harris:tcpattacks}.
-The spoofed packet would contain the seq and ack numbers expected by the recipient and the source address of the other host.
-Although the spoofed packet is being sent by the attacker, the recipient does not have the ability to authenticate the source of the packet and would therefore accept it as a valid packet.
-However, following this spoof, the connection is effectively broken as the expected seqnums and acknums of the two hosts are out of sync.
-Data packets sent to either host would be regarded as invalid due to the mismatch of numbers, and no acknowledgement packets are sent in response.
+The spoofed packet would contain the seqnum and acknum expected by the recipient and the source address of the other host.
+Although the spoofed packet is sent by the attacker, the recipient does not have the ability to authenticate the source of the packet and would therefore accept it as a valid packet.
+However, following this spoof, the connection is effectively broken, as the expected seqnums and acknums of the two hosts are out of sync.
+Subsequent data packets sent to either host would be regarded as invalid due to the mismatch of numbers, and no acknowledgement packets are sent in response.
 Thus, the connection is quickly reset by both hosts.
 As a result, both hosts would notice a disruption in the network service and may suspect an attack.
 
 \subsubsection{Man-in-the-Middle}
 
-Following a TCP hijacking attack, the attacker can act as the man-in-the-middle by relaying all messages from one host to the other~\cite{joncheray:simpleattack, gregg:stackhack}.
-Although the initial spoofed packet has caused an imbalance between the TCP stacks of both hosts, for each packet sent by either hosts, an attacker is able to spoof an acknowledgement packet to the responding host by translating the seqnums and acknums on the fly.
-However, a problem arises when each host receives the original packet(s) that was sent to each other.
+Following a TCP hijacking attack, the attacker can act as a man-in-the-middle by relaying all messages from one host to the other~\cite{joncheray:simpleattack, gregg:stackhack}.
+Although the initial spoofed packet has caused an imbalance between the TCP stacks of both hosts, for each packet sent by either hosts, an attacker is able to forward the packet to the recipient host by spoofing a copy of the packet and translating the seqnums and acknums on the fly.
+However, a problem arises when each host receives the original packet(s) that was sent to each other, with the unexpected seqnums and acknums.
 As previously mentioned, a packet is considered valid if its seqnum falls within the range of the expected seqnum and the rcvwnd.
 Spoofed packets cause the spoofed host to lag behind on its seqnum, and thus packets sent from the spoofed host are not in the acceptable range.
 Subsequently, for each packet the spoofed host sends, the other host drops it and sends back an acknowledgement packet with the expected seqnum and acknum trying to correct this desynchronization.
@@ -157,7 +160,7 @@ Intrusion detection systems can characterize this load with statistical analysis
 A method of avoiding TCP ack storms is to stop hosts from receiving legitimate packets.
 While the attacker cannot delete or reroute packets, the attacker can utilize Address Resolution Protocol (ARP) poisoning to mislead hosts into ignoring legitimate packets.
 ARP provides translation of IP address to MAC address.
-If the ARP is poisoned with the wrong MAC address, a host will send TCP/IP packets to the wrong MAC address and ignore incoming packets from the real MAC address.
+If ARP poisoned with the wrong MAC address, a host will send TCP/IP packets to the wrong MAC address and ignore incoming packets from the real MAC address.
 The attacker needs only to ARP poison one host to circumvent ack storms, as the compromised host will not respond to the other host.
 
 However, ARP traffic does not travel beyond the local area network (LAN) and imposes the restriction that the attacker be within the same LAN as at least one host.
@@ -198,7 +201,7 @@ If followed correctly, only a few ack packets would be sent and no ack storm wou
 
 Once this is achieved, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully.
 In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that conforms with the specification for TCP and the application protocol and also maintains a small network footprint.
-Thus allowing the attacker to carry out an attack without using exploits prohibited and impractical in well-controlled networks and evading existing intrusion detection systems.
+This allows the attacker to carry out an attack without using exploits prohibited and impractical in well-controlled networks and evade existing intrusion detection systems.
 The significance of ABTH provides the attacker an exit strategy in which the attack may be executed unnoticed.
 
 \section{Case Study: Windows Live Messenger}
