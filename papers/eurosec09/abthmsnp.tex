@@ -69,7 +69,7 @@ Trivial design features of application protocols become fatal vulnerabilities th
 
 \begin{sloppypar}
 To demonstrate the feasibility and effectiveness of ABTH, we developed an attack on the communications of Microsoft Windows Live Messenger (WLM).
-With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, Windows Live Messenger (WLM) represents one of the largest IM networks, featuring 17 million users~\cite{templeton:spoof}.
+With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, Windows Live Messenger (WLM) represents one of the largest IM networks, featuring 17 million users~\cite{microsoft:advertising}.
 By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentiality of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various WLM clients.
 We contacted Microsoft about weakness of MSNP against ABTH in the spring of 2008; the subject matter was still under investigation as of September 2008.
@@ -371,7 +371,7 @@ Likewise, application commands that do not provoke responses would not work eith
 \subsection{Countermeasures}
 
 In order to properly authenticate messages, a naive countermeasure against ABTH is to encrypt all application traffic, for example with SSL/TLS.
-However, with over 17 million unique users~\cite{templeton:spoof}, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic.
+However, WLM and other large-scale applications would require substantial server resources to encrypt all network traffic.
 In the scenario where applications connect peers to peers by allowing a communication channel between two clients, as MSNP implicitly does through the mixer connection, clients may encrypt traffic and authenticate each other through the channel provided by the application.
 For example, SimpLite-MSN~\cite{secway:url} sets up RSA keys and authenticates all instant messaging traffic for MSNP, thus providing protection against spoofing.
 
