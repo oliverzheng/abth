@@ -117,7 +117,7 @@ Internet service providers (ISPs) and enterprises often use network access contr
 However, in wireless networks, especially in unencrypted 802.11 networks, sniffing and spoofing can be done with well designed software and off-the-shelf hardware.
 
 Computational capabilities of the attacker do not go beyond the limits of a consumer-level personal computer.
-For example, in our implementation of of ABTH for Windows Live Messenger, the victim was attacked in the matter of two seconds with the use of a modest laptop.
+For example, in our implementation of ABTH for Windows Live Messenger, the victim was attacked in the matter of two seconds with the use of a modest laptop.
 
 \subsection{Attacks on TCP}
 
@@ -185,7 +185,7 @@ Application-level commands, such as a ping, feature two characteristics of parti
 
 ABTH exploits these seemingly trivial application-level commands at the TCP level to perform TCP hijacking and resynchronization.
 In most application protocols, a ping to a host will provoke a response; using this knowledge the attacker can inflate the seqnum of the host.
-Assuming ping responses exceed the data length of pings, by injecting certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
+Assuming ping responses exceed the data length of pings, injecting certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
 
 As a result, an attacker can spoof a packet containing a malicious command and is able to avoid an ack storm from occurring by spoofing multiple pings to the hosts to bring up a lagging seqnum of a host to a desired seqnum. 
 The order in which these packets are injected should follow a specific rule.
