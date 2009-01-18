@@ -198,7 +198,7 @@ In comparison to typical TCP hijacking methods which usually lead victims suspic
 This allows the attacker to carry out an attack without using exploits prohibited and impractical in well-controlled networks and evade existing intrusion detection systems.
 The significance of ABTH is in providing the attacker with an exit strategy in which the attack may be executed unnoticed.
 
-\section{Case Study: Windows Live Messenger}
+\section{Case Study:\\Windows Live Messenger}
 \label{sec:casestudy}
 
 First released in 1999, Windows Live Messenger (WLM) has since grown to become one of the most popular instant messaging (IM) services.
@@ -245,7 +245,7 @@ As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a 
 
 \begin{figure}[h]
 	\centering
-	\caption{.NET Messenger Service Infrastructure}
+	\caption{.NET Messenger Service infrastructure}
 	\label{fig:wlminfrastructure}
 	\includegraphics{graphics/infrastructure}
 \end{figure}
@@ -265,7 +265,7 @@ MSNP is a text-based application protocol that defines the communication between
 Although the protocol was first intended to be an open standard~\cite{fout:insidewlm}, it has since become proprietary and has undergone numerous revisions.
 However, due to the unencrypted nature of the protocol, attempts to reverse-engineer the protocol have proven successful~\cite{hypothetic:msnp, msnfanatic:msnp}.
 
-The protocol consists of plain text commands; each command is prefixed with three capital letters (e.g., command \texttt{PNG} represents ping).
+The protocol consists of plain text commands; each command is prefixed with three capital letters (e.g., command \texttt{PNG} represents ping), and is sent in a separate packet.
 
 To determine the validity of the persistent connection between the NS and the client, MSNP allows for asynchronous bidirectional pings; both the WLM client and the NS have the ability to initiate a ping.
 The client pings the NS with \texttt{PNG}; the NS pings the client with \texttt{CHL}.
@@ -374,6 +374,8 @@ This straightforward yet non-trivial detail also alleviates the application prot
 For network service providers, the most effective method to disable ABTH and message spoofing altogether would be to prohibit IP packets with forged source IP addresses~\cite{templeton:spoof}.
 However, this method would be ineffective in an unencrypted wireless medium, such as WiFi, commonly found in coffee shops and other public locations. 
 
+\vfil\eject
+
 \subsection{Feasibility}
 \label{sec:feasibility}
 
@@ -401,6 +403,8 @@ Although hardware Ethernet equipment has been updated to obstruct lower level at
 In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer unencrypted WiFi service, ABTH poses a threat.
 Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
 As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
+
+\vfil\eject
 
 \bibliographystyle{abbrv}
 \bibliography{abthmsnp}
