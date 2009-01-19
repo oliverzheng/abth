@@ -61,7 +61,7 @@ To demonstrate the feasibility and effectiveness of ABTH, we developed an attack
 With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, Windows Live Messenger (WLM) represents one of the largest IM networks, featuring 17 million users~\cite{microsoft:advertising}.
 By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentiality of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various WLM clients.
-We contacted Microsoft about weakness of MSNP against ABTH in the spring of 2008; the subject matter was still under investigation as of September 2008.
+We contacted Microsoft about the weakness of MSNP against ABTH in the spring of 2008; the subject matter was still under investigation as of September 2008.
 Although our sample attack is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 \end{sloppypar}
 
@@ -112,7 +112,7 @@ For the TCP attacks to follow as well as ABTH, the main assumption is that attac
 We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack or deleting or rerouting network traffic.
 
 In wired networks, sniffing and spoofing may be very limited.
-For example, network switches prevent sniffing in Ethernet and it is usually very hard to sniff on routers.
+For example, network switches prevent sniffing in Ethernet and it is usually very difficult to sniff on routers.
 Internet service providers (ISPs) and enterprises often use network access control to block IP spoofing.
 However, in wireless networks, especially in unencrypted 802.11 networks, sniffing and spoofing can be done with well designed software and off-the-shelf hardware.
 
@@ -174,8 +174,6 @@ As discussed, existing attacks on TCP do not provide much guarantee for an attac
 ABTH improves upon conventional TCP session hijacking by allowing an attacker to automatically resynchronize TCP seqnums and acknums of the two hosts of the connection.
 It is a specific method of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer.
 The technique assumes the adversary model described in Section~\ref{sec:adversarymodel}. 
-Computational capabilities of the attacker do not go beyond the limits of a consumer-level personal computer.
-For example, in our implementation of ABTH for WLM, the victim was attacked in the matter of two seconds with the use of a modest laptop.
 
 \subsection{Attack Details}
 
@@ -241,7 +239,7 @@ WLM uses the Microsoft Notification Protocol (MSNP) to communicate to servers wi
 \end{table*}
 
 The .Net Messenger Service provides WLM clients with instant messaging and presence services that are required for user-to-user communication.
-As can be seen in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers exist within this cluster: notification servers (NS) and mixer servers (MS)~\cite{torre:wlm}.
+As shown in Figure~\ref{fig:wlminfrastructure}, the service consists of a centralized cluster of servers; two types of servers exist within this cluster: notification servers (NS) and mixer servers (MS)~\cite{torre:wlm}.
 
 \begin{figure}[h]
 	\centering
@@ -315,7 +313,7 @@ The spoofed command creates the effect of identity impersonation.
 \end{table*}
 
 The attack uses the official WLM client and the live .NET Messaging Service, as well as a custom-made rogue WLM mixer server. 
-The attacker spoofs a control packet from NS to make the victim to connect to the rogue MS.
+The attacker spoofs a control packet from the NS to make the victim to connect to the rogue MS.
 When TCP seqnums are synchronized, NS acknum matches client seqnum and client acknum matchs NS seqnum, as shown in the first row of Table~\ref{tab:identityspoof}.
 The \texttt{RNG} command specifies two items of interest that the attacker can use for identity spoofing: the address of an MS and the email and name of the user to impersonate.
 Upon receiving the \texttt{RNG} command, the victim will connect to the specified MS to join an IM conversation with the user whose name and email was denoted in the command.
@@ -324,7 +322,8 @@ An attacker injects an \texttt{RNG} command specifying the address of a rogue MS
 Upon receiving the \texttt{RNG} command, the victim's WLM client opens a new TCP connection to the rogue MS.
 Although the injection of the \texttt{RNG} packet has caused the seqnums and acknums of the victim's WLM client and the NS to become desynchronized, the connection can be resynchronized with ABTH.
 
-For the sake of example, let us assume that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Table~\ref{tab:identityspoof}.
+Let us assume that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Table~\ref{tab:identityspoof}.
+For example, in our implementation of ABTH for WLM, the victim was attacked in the matter of two seconds with the use of a modest laptop.
 While the seqnums of the NS and the client cannot be controlled, pings can provoke responses that can be used to inflate the seqnums of one end of the connection.
 Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
@@ -347,7 +346,7 @@ In the case of WLM, it is crucial that ABTH is completed prior to the next clien
 Otherwise, the client would ping the NS and discover the imbalance in seqnums, leading to a timeout and disconnection.
 Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments---described in Section~\ref{sec:feasibility}---have demonstrated.
 
-Our attack tool calculates and generates prior to the attack the required commands to send, which allows it to complete an attack within 2 seconds after it observes a PNG command sent from the victim to a notification server.
+Our attack tool calculates and generates prior to the attack the required commands to send, which allows it to complete an attack within 2 seconds after it observes a \texttt{PNG} command sent from the victim to a notification server.
 If the victim's client and the NS exchange a packet during the restoration phase, ABTH would fail in resynchronizing their TCP stacks.
 As a result, no network traffic can occur while ABTH is in progress. 
 Our measurements described in Section~\ref{sec:feasibility} suggest that 2 seconds are a sufficiently short interval for achieving success rate of 95\%.
