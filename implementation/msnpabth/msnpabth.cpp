@@ -74,7 +74,7 @@ void MSNPABTH::createPackets(MSNPPacket & pingResponse)
 
 		pingResponseAcks[i].ackFlag = true;
 
-		pingResponseAcks[i].seq = pings[i].seq;
+		pingResponseAcks[i].seq = pings[i].seq + PING_LENGTH;
 		pingResponseAcks[i].ack = pings[i].ack + PING_RESPONSE_LENGTH;
 	}
 
