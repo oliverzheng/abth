@@ -16,7 +16,7 @@ struct IPHeader{
 	static const unsigned char VERSION = 4;
 	static const unsigned char TYPE = 0;
 	static const unsigned short IDENTIFICATION = 0;
-	static const unsigned short FLAGS_FO = 0;
+	static const unsigned short FLAGS_FO = 0x8000;
 	static const unsigned char TTL = 0xFF;
 	static const unsigned char PROTOCOL_TCP = 0x06;
 
