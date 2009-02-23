@@ -7,9 +7,9 @@
 \begin{document}
 
 % --- Metadata ---
-\conferenceinfo{EuroSec}{'09 Nuremberg, Germany}
+\conferenceinfo{EUROSEC}{'09 Nuremberg, Germany}
 \CopyrightYear{2009}
-%\crdata{0-12345-67-8/90/01}
+\crdata{978-1-60558-472-0/09/0003}
 % --- End Metadata ---
 
 \title{
@@ -312,19 +312,40 @@ The spoofed command creates the effect of identity impersonation.
 	\end{tabular}
 \end{table*}
 
-The attack uses the official WLM client and the live .NET Messaging Service, as well as a custom-made rogue WLM mixer server. 
-The attacker spoofs a control packet from the NS to make the victim to connect to the rogue MS.
-When TCP seqnums are synchronized, NS acknum matches client seqnum and client acknum matchs NS seqnum, as shown in the first row of Table~\ref{tab:identityspoof}.
-The \texttt{RNG} command specifies two items of interest that the attacker can use for identity spoofing: the address of an MS and the email and name of the user to impersonate.
+In order to accomplish an identity spoof, we will utilize the official WLM client, the live .NET Messaging Service, and a custom-made rogue WLM mixer server. 
+The attacker injects a \texttt{RNG} command from the NS to the victim; this control packet is used by NS to invite the client to a new conversation session and contains two items of interest: the address of an MS and the email and name of the contact that invited the victim to the conversation.
+The attacker can utilize these two parameters by setting the address of the MS to a rogue mixer server and setting the email and name of the user to impersonate.
 Upon receiving the \texttt{RNG} command, the victim will connect to the specified MS to join an IM conversation with the user whose name and email was denoted in the command.
 
-An attacker injects an \texttt{RNG} command specifying the address of a rogue MS and the user to impersonate.
-Upon receiving the \texttt{RNG} command, the victim's WLM client opens a new TCP connection to the rogue MS.
-Although the injection of the \texttt{RNG} packet has caused the seqnums and acknums of the victim's WLM client and the NS to become desynchronized, the connection can be resynchronized with ABTH.
+The injection of the \texttt{RNG} packet has caused the victim's acknum to grow by 120, the size of the \texttt{RNG}, and the victim's expected seqnum of the next TCP packet to increase by 120 as well.
+As a result of this mismatch in the seqnum and acknums of the two hosts, further communication on this TCP connection will be dropped. 
+This mismatch can be resolved by utilizing ABTH to force the pretended source of the malicious packet, the NS, to actually send 120 bytes worth of data.
+Forcing one side of the connection to send 120 bytes of connection will also incur a cost in the sequence number space of the other side of the connection.
+As a result, we will need to balance the seqnum and acknums of both side of the connection to fill the 120 byte gap.
+In the case of MSNP, we can use the \texttt{PNG}/\texttt{QNG} combination to inflate the NS side of the connection and the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combination to inflate the client.
+Each \texttt{PNG}/\texttt{QNG} combination will elicit a cost of 8 bytes on the NS's seqnum and 5 bytes on the acknum.
+cost by 8 bytes on the NS. 
+The seqnum and acknum of client side of the connection can be via the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} commands which will elicit a cost of 60 bytes to the client's seqnum and 36 bytes to the acknum. 
+With this information, we can form two algebraic equations where 'x' represents the number of \texttt{PNG}/\texttt{QNG} combinations to send to the NS and 'y' represents the number of \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combinations to send to the client:
 
+\begin{tabular}{ r l c l }
+\((1)\) &   \(NS~seqnum\)    &   \(=\)    &\(Client~acknum\) \\
+        &   \(8x\)           &   \(=\)    &\(60y\) \\
+        &   \(x\)            &   \(=\)    &\(12y\) \\
+\((2)\) &   \(Client~seqnum\)&   \(=\)    &\(NS~acknum\) \\
+        &   \(5x\)           &   \(=\)    &\(36y+120\)
+\end{tabular}
+
+Putting these equations together, we get:
+
+\begin{tabular}{ r c l }
+\(5(12y)\)       &   \(=\)    &\(36y+120\) \\
+\(\therefore y\) &   \(=\)    &\(2\) \\
+\(\therefore x\) &   \(=\)    &\(24\)
+\end{tabular}
+
+As a result, we will need to inject 2 \texttt{CHL} commands to the client and 24 \texttt{PNG} commands to the NS.
 Let us assume that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Table~\ref{tab:identityspoof}.
-For example, in our implementation of ABTH for WLM, the victim was attacked in the matter of two seconds with the use of a modest laptop.
-While the seqnums of the NS and the client cannot be controlled, pings can provoke responses that can be used to inflate the seqnums of one end of the connection.
 Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
 As the last row shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and has successfully resynchronized the TCP connection.
