@@ -37,15 +37,17 @@ void MSNPABTH::packetReceived(TCPPacket & tcpPacket)
 	 */
 	switch (msnpPacket.getCommand()) {
 		case MSNPPacket::PING_RESPONSE:
-			if (!started)
+			if (!started) {
 				createPackets(msnpPacket);
+				sendInvite();
+			}
 
 			if (!sendPing())
 				break;
 
 		case MSNPPacket::CHALLENGE_RESPONSE:
 			if (started && sendChallenge(msnpPacket))
-				sendInvite();
+				packetObserver->stop();
 			break;
 
 		default:
@@ -55,6 +57,18 @@ void MSNPABTH::packetReceived(TCPPacket & tcpPacket)
 
 void MSNPABTH::createPackets(MSNPPacket & pingResponse)
 {
+	invite.setCommand(MSNPPacket::INVITE);
+	invite.setCustom(INVITE_MESSAGE);
+	invite.setLength(INVITE_LENGTH);
+
+	invite.useAddress(pingResponse);
+
+	invite.ackFlag = true;
+	invite.pshFlag = true;
+
+	invite.seq = pingResponse.seq + PING_RESPONSE_LENGTH;
+	invite.ack = pingResponse.ack;
+
 	for (unsigned int i = 0; i < PING_NUM; i++) {
 		pings[i].setCommand(MSNPPacket::PING);
 		pings[i].useReverseAddress(pingResponse);
@@ -85,7 +99,7 @@ void MSNPABTH::createPackets(MSNPPacket & pingResponse)
 		challenges[i].ackFlag = true;
 		challenges[i].pshFlag = true;
 
-		challenges[i].seq = pingResponse.seq + PING_RESPONSE_LENGTH + i * (CHALLENGE_LENGTH + CHALLENGE_RETURN_LENGTH);
+		challenges[i].seq = INVITE_LENGTH + pingResponse.seq + PING_RESPONSE_LENGTH + i * (CHALLENGE_LENGTH + CHALLENGE_RETURN_LENGTH);
 		challenges[i].ack = pingResponse.ack + i * CHALLENGE_RESPONSE_LENGTH;
 
 		challengeReturns[i].useAddress(pingResponse);
@@ -96,18 +110,6 @@ void MSNPABTH::createPackets(MSNPPacket & pingResponse)
 		challengeReturns[i].seq = challenges[i].seq + CHALLENGE_LENGTH;
 		challengeReturns[i].ack = challenges[i].ack + CHALLENGE_RESPONSE_LENGTH;
 	}
-
-	invite.setCommand(MSNPPacket::INVITE);
-	invite.setCustom(INVITE_MESSAGE);
-	invite.setLength(INVITE_LENGTH);
-
-	invite.useAddress(pingResponse);
-
-	invite.ackFlag = true;
-	invite.pshFlag = true;
-
-	invite.seq = pingResponse.seq + PING_RESPONSE_LENGTH + (CHALLENGE_LENGTH + CHALLENGE_RETURN_LENGTH) * CHALLENGE_NUM;
-	invite.ack = pingResponse.ack + CHALLENGE_RESPONSE_LENGTH * CHALLENGE_NUM;
 
 	started = true;
 }
@@ -145,5 +147,4 @@ bool MSNPABTH::sendChallenge(MSNPPacket & challengeResponse)
 void MSNPABTH::sendInvite()
 {
 	packetInjector->inject(invite);
-	packetObserver->stop();
 }
