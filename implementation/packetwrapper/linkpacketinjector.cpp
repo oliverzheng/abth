@@ -1,5 +1,5 @@
 /* Project Includes */
-#include "packetinjector.hpp"
+#include "linkpacketinjector.hpp"
 #include "networkheaders.hpp"
 
 /* Additional Library Includes */
@@ -8,7 +8,7 @@
 /* Namespace Declarations */
 using namespace packetwrapper;
 
-bool PacketInjector::inject(TCPPacket & tcpPacket) throw(PacketInjectException)
+bool LinkPacketInjector::inject(TCPPacket & tcpPacket) throw(PacketInjectException)
 {
 	if (!isInterfaceSet())
 		return false;

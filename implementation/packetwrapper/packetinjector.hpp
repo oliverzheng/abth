@@ -12,10 +12,10 @@ namespace packetwrapper {
 /* Resolve circular dependency */
 class TCPPacket;
 
-class PacketInjector : public InterfaceApp
+class PacketInjector
 {
 public:
-	bool inject(TCPPacket & tcpPacket) throw(PacketInjectException);
+	virtual bool inject(TCPPacket & tcpPacket) throw(PacketInjectException) = 0;
 
 }; /* class PacketInjector */
 

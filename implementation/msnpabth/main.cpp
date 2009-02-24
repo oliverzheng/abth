@@ -1,5 +1,6 @@
 #include <packetwrapper/packetobserver.hpp>
 #include <packetwrapper/interface.hpp>
+#include <packetwrapper/linkpacketinjector.hpp>
 #include <msnp/msnppacket.hpp>
 #include "msnpabth.hpp"
 
@@ -48,7 +49,7 @@ int main()
 	(*it).open(false);
 	cout << "Operating on " << (*it).name << endl;
 
-	PacketInjector * pi = new PacketInjector();
+	LinkPacketInjector * pi = new LinkPacketInjector();
 	pi->setInterface(*it);
 
 	PacketObserver * po = new PacketObserver();

@@ -60,9 +60,10 @@ ADD_LIBRARY (packetwrapper STATIC
 	interfaceapp.cpp
 	ipaddress.hpp
 	ipaddress.cpp
+	linkpacketinjector.hpp
+	linkpacketinjector.cpp
 	networkheaders.hpp
 	packetinjector.hpp
-	packetinjector.cpp
 	packetobservable.cpp
 	packetobservable.hpp
 	packetobserver.cpp

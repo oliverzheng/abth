@@ -61,14 +61,14 @@ public:
 	/* TCPPacket owns this data */
 	const unsigned char * data;
 
-private:
-	bool parse(const unsigned char * payload, unsigned int payloadLength);
-
 	/* Constructs a full packet with Ethernet, IP, and TCP headers.
 	 * Returned buffer has length FULL_HEADER_SIZE + dataLength.
 	 * Ownership of returned buffer is transferred to the user.
 	 */
 	unsigned char * construct();
+
+private:
+	bool parse(const unsigned char * payload, unsigned int payloadLength);
 
 	/* Let PacketObserver parse a raw packet */
 	friend class PacketObserver;
