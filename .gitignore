@@ -5,3 +5,5 @@ implementation/build
 papers/eurosec09/abthmsnp.*
 !papers/eurosec09/abthmsnp.bib
 !papers/eurosec09/abthmsnp.tex
+implementation/tags
+msnp/server/build
