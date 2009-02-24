@@ -61,7 +61,7 @@ To demonstrate the feasibility and effectiveness of ABTH, we developed an attack
 With instant messaging (IM) becoming ubiquitous at both home and work~\cite{aol:survey}, Windows Live Messenger (WLM) represents one of the largest IM networks, featuring 17 million users~\cite{microsoft:advertising}.
 By attacking the Microsoft Notification Protocol (MSNP)---the protocol in use by WLM---with ABTH, the privacy and confidentiality of WLM users can be compromised; an attacker is capable of spoofing any command available to the WLM client and impersonating any contact known to the victim.
 As a result, unauthorized messages can be delivered to various WLM clients.
-We contacted Microsoft about the weakness of MSNP against ABTH in the spring of 2008; the subject matter was still under investigation as of September 2008.
+We contacted Microsoft about the weakness of MSNP against ABTH in the spring of 2008; the subject matter was still under investigation as of February 2009.
 Although our sample attack is limited to WLM, due to its generic nature, ABTH can be mounted on a variety of application protocols.
 \end{sloppypar}
 
@@ -90,8 +90,8 @@ Each end of the connection is identified by an Internet Protocol (IP) address an
 Each TCP packet is tagged with a sequence number, an acknowledgement number, and a receive window, herein referred to as seqnum, acknum, and rcvwnd, respectively.
 seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing.
 Within each TCP header are also 8 control flags.
-Packets containing data have the SYN and ACK flags set; packets with no data only have the ACK flag set to denote an empty acknowledgement packet.
-For each data packet that is sent, an acknowledgement packet has to be received to affirm packet delivery.
+After a connection is established (which is the only relevant timeframe ABTH deals with), each packet can confirm reception of data by setting the ACK flag and/or contain data; thus, some packets with no data have just the ACK flag set to denote an empty acknowledgement packet.
+For each data packet that is sent, a returning packet has to be received with acknum equal the seqnum of the sent packet to affirm packet delivery.
 A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
 
 In order for the two hosts to be in a synchronized state where data packets can be received and processed as valid packets, the seqnum of one host must match the acknum of the other and vice versa. 
@@ -103,7 +103,7 @@ If the client sends a data packet of 10 bytes, the client seqnum increases to 60
 When either hosts receives a packet containing an unexpected seqnum two scenarios may occur.
 If the received seqnum is within the range of the expected seqnum and the rcvwnd (the packet received arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent.
 (An acknowledgement packet would confirm the reception of the missing packet.)
-Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{anderson:ackstorm}, which is, in the perspective of an attacker, an undesirable effect.
+Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{joncheray:1995}, which is, in the perspective of an attacker, an undesirable effect.
 
 \subsection{Adversary Model}
 \label{sec:adversarymodel}
@@ -124,6 +124,7 @@ For example, in our implementation of ABTH for Windows Live Messenger, the victi
 Many attacks on TCP exploit vulnerabilities of the seqnum and acknum synchronization mechanism.
 In order to demonstrate the value of ABTH, attacks pertinent to ABTH are first discussed in the following sections.
 All of these attacks, including ABTH, assume the threat model defined in Section~\ref{sec:adversarymodel}.
+There are other TCP attacks that assume different (and perhaps weaker) adversary models, but they are not relevant for this discussion.
 
 \subsubsection{TCP Hijacking}
 
@@ -375,7 +376,7 @@ Complex algorithms capable of adjusting to live traffic dynamically might improv
 
 ABTH requires the length of ping responses be greater than the commands issued to provoke them.
 If this were not the case, an attempt to resynchronize the two hosts through ABTH would only widen the gap of mismatched seqnums.
-Likewise, application commands that do not provoke responses would not work either, e.g., no operation.
+Likewise, application commands that do not provoke responses would not work either, e.g., no operation or null data~\cite{joncheray:1995}.
 
 \subsection{Countermeasures}
 
@@ -401,7 +402,8 @@ However, this method would be ineffective in an unencrypted wireless medium, suc
 
 Our implementation of ABTH on MSNP completes within roughly 2 seconds and is triggered on the reception of a MSNP \texttt{PNG} command.
 In order for the attack to succeed, no message exchange between the victim's client and the NS can occur within these 2 seconds.
-Although the amount of MSNP traffic is dependent on a variety of factors such as the time of day and the number of WLM victim's contacts currently online, our measurements obtained through monitoring several days of MSNP traffic suggest that the probability of a control message occurring within 2 seconds of a ping is less than 5\%, regardless of the number of contacts online on the contact list, as can be seen in Figure~\ref{fig:successrate}.
+While the amount of MSNP traffic is dependent on a variety of factors, we logged the success rate against the number of online WLM contacts, which is the only quantifiable metric in a WLM session.
+Our measurements obtained through monitoring several days of MSNP traffic suggest that the probability of a control message occurring within 2 seconds of a ping is less than 5\%, regardless of the number of contacts online on the contact list, as can be seen in Figure~\ref{fig:successrate}.
 
 \begin{figure}[h]
 	\centering
