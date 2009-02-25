@@ -186,13 +186,13 @@ ABTH exploits these seemingly trivial application-level commands at the TCP leve
 In most application protocols, a ping to a host will provoke a response; using this knowledge the attacker can inflate the seqnum of the host.
 Assuming ping responses exceed the data length of pings, injecting certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
 
-As a result, an attacker can spoof a packet containing a malicious command and is able to avoid an ack storm from occurring by spoofing multiple pings to the hosts to bring up a lagging seqnum of a host to a desired seqnum. 
+As a result, an attacker can spoof a packet containing a malicious command and is able to minimize an ack storm by spoofing multiple pings to the hosts to bring up a lagging seqnum of a host to a desired seqnum. 
 The order in which these packets are injected should follow a specific rule.
-For a packet sent by each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, and the acknum should not be larger than the seqnum of the recipient host.
-For the attacker, this means alternating the spoofing of packets between the two hosts for them to catch up to each other.
-If followed correctly, only a few ack packets would be sent and no ack storm would ensue.
+For a packet sent to each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, in which case the packet contents (if any) is buffered by the receiver and no ack is returned, thus minimizing the ack storm.
+The very first packet, however, still incites an exchange of acks for the short duration of the attack; if performed correctly, ABTH should finish quickly enough for these acks to be virtually undetectable.
+Additionally, as later described in Section~\ref{sec:victimenvironment}, different implementations of TCP stacks process incoming packets differently (perhaps due to ambiguous interpretations of the TCP state machine~\cite{zaghal:model}) and alter the behavior of ABTH, for better and for worse.
 
-Once this is achieved, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully.
+Once ABTH is completed, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully.
 In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that conforms to the specification of TCP and the application protocol and also maintains a small network footprint.
 This allows the attacker to carry out an attack without using exploits prohibited and impractical in well-controlled networks and evade existing intrusion detection systems.
 The significance of ABTH is in providing the attacker with an exit strategy in which the attack may be executed unnoticed.
@@ -412,6 +412,52 @@ Our measurements obtained through monitoring several days of MSNP traffic sugges
 	\includegraphics[width=\columnwidth]{graphics/plot}
 \end{figure}
 
+\subsection{Victim Environment}
+\label{sec:victimenvironment}
+
+The implementation of the TCP/IP stack on the victim's operating system dictates the behaviour of an ABTH attack.
+The quirk is different implementations behave differently upon receiving a packet with unexpected seq and ack nums.
+Gathered from empircal tests, we summarize three systems: an ideal implementation of our interpretation of the TCP packet processing (as shown in~\cite{zaghal:model}, and the implementation on Microsoft Windows and on Linux in Table~\ref{tab:implementations}.
+These only deal with packets with seq num within the acceptable range; otherwise, the packet is dropped and an ack is sent back.
+
+\begin{table*}[tbp]
+	\centering
+
+	\caption {Treatment of a packet with unexpected seq and ack numbers on different systems}
+	\label{tab:implementations}
+
+	\begin{tabular}{c|c|c|c|c|c|c|c}
+		\hline
+		\textbf{Seq Num} & \textbf{Ack Num} & \multicolumn{2}{|c|}{\textbf{Ideal Implementation}} & \multicolumn{2}{|c|}{\textbf{Microsoft Windows}} & \multicolumn{2}{|c}{\textbf{Linux}} \\
+		& & Accepted & Ack Returned & Accepted & Ack Returned & Accepted & Ack Returned \\
+		\hline
+		= Expected & $\leq$ Expected & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+		\hline
+		= Expected & $>$ Expected & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+		\hline
+		$>$ Expected & $\leq$ Expected & $\checkmark$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\times$ \\
+		\hline
+		$>$ Expected & $>$ Expected & $\times$ & $\checkmark$ & $\times$ & $\times$ & $\times$ & $\checkmark$ \\
+		\hline
+	\end{tabular}
+
+	\begin{flushleft}
+		The $>$ Expected value for Seq Num implies that the number is larger than the expected value but smaller than the receive window, thus falls within range of acceptable seq num.
+	\end{flushleft}
+\end{table*}
+
+In the ideal implementation, each ping packet, PNG in the case of MSNP, would be met with an additional ack storm.
+In a publicly switched network where packet latency is typically 20ms, the MSNP ABTH attack that takes 2 seconds would generate roughly 2500 ack packets, assuming the attacker generates a packet every round trip time (40ms).
+Whether or not this statistic is acceptable for a TCP attack based on its environment and threat model is beyond the scope of this discussion.
+
+In the Windows implementation, which was used extensively in our testing, no acks are returned for packets larger than expected seq and ack nums.
+This directly resulted in elimination of ack storms all together; a total of two ack packets are sent by the victim.
+Our assumption in this case is that the NS of the .Net Messenger Service runs on Windows.
+
+In the case of Linux, the attack fails completely.
+Since a packet with the expected seq num but larger than expected ack num (row 2 of \ref{tab:implementations}) is accepted by the TCP stack, it renders descynchronization quite difficult.
+The host that receives response packets, QNGs in the case of MSNP, would accept them and pass them to the application.
+Any attempt to elicit response to fill a gap in seq num (caused by a malicious packet) would increase the ack num of the receiving host, and thus fail.
 
 \section{Conclusion}
 \label{sec:conclusion}
