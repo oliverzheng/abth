@@ -287,7 +287,7 @@ The spoofed command creates the effect of identity impersonation.
 
 \begin{figure*}
 	\centering
-	\caption{Identity Spoof Packet Flow}
+	\caption{Identity spoof packet flow}
 	\label{fig:identityspoof}
 	\includegraphics[scale=2]{graphics/packetGraph}
 \end{figure*}
@@ -328,9 +328,8 @@ As a result, we will need to inject 2 \texttt{CHL} commands to the client and 24
 
 Let us assume, for the sake of simplicity, that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Figure~\ref{fig:identityspoof}.
 Figure~\ref{fig:identityspoof} outlines the flow of injected packets between the two hosts.
-The dotted arrows represent the packets the receiving hosts sends as a response to the injected packets.
-These packets are still received by the other end of the connection but are largely ignored as, in the perspective of the receiver, the packet contains an incorrect seqnum and acknum.
-As the last row shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and has successfully resynchronized the TCP connection.
+The dotted arrows extend ping responses, as these packets are still received by the other end of the connection but are largely ignored since they contain incorrect seqnums and acknums in the perspective of the receiver.
+As the last row shows, with matching seqnums and acknums, ABTH has completed its series of application specific commands and has successfully resynchronized the TCP connection.
 The connection is now is ready to transmit legitimate and/or illegitimate packets further.
 
 As a result of spoofing the \texttt{RNG} command and seqnum and acknum re-synchronization via ABTH, the attacker is able to send/receive any number of IM chat messages to/from the victim, while impersonating the user specified in the \texttt{RNG} command.
@@ -376,8 +375,6 @@ This straightforward yet non-trivial detail also alleviates the application prot
 For network service providers, the most effective method to disable ABTH and message spoofing altogether would be to prohibit IP packets with forged source IP addresses~\cite{templeton:spoof}.
 However, this method would be ineffective in an unencrypted wireless medium, such as WiFi, commonly found in coffee shops and other public locations. 
 
-\vfil\eject
-
 \subsection{Feasibility}
 \label{sec:feasibility}
 
@@ -398,7 +395,7 @@ Our measurements obtained through monitoring several days of MSNP traffic sugges
 
 The implementation of the TCP/IP stack on the victim's operating system dictates the behaviour of an ABTH attack.
 The quirk is that different implementations behave differently upon receiving a packet with unexpected seq and acknums.
-Gathered from empircal tests, we summarize three TCP stacks in Table~\ref{tab:implementations}: an ideal (non-existent) RFC specified interpretation of TCP packet processing (as shown in~\cite{zaghal:model}), and the TCP stack implementation on Microsoft Windows and Linux.
+Gathered from empirical tests, we summarize three TCP stacks in Table~\ref{tab:implementations}: an ideal (non-existent) RFC specified interpretation of TCP packet processing (as shown in~\cite{zaghal:model}), and the TCP stack implementation on Microsoft Windows and Linux.
 The above implementations only deal with packets with seqnum within the acceptable range (greater or equal to expected seqnum and smaller than the receive window); otherwise, the packet is dropped and an ack is sent back regardless of the implementation of the TCP stack.
 
 \begin{table*}[tbp]
@@ -452,8 +449,6 @@ Although hardware Ethernet equipment has been updated to obstruct lower level at
 In environments that provide a common physical communication medium, such as hubbed networks and coffee shops that offer unencrypted WiFi service, ABTH poses a threat.
 Application protocols vulnerable to ABTH, such as MSNP, were not designed to offer secure communication channels.
 As such, it is imperative that, as protocols become more widely adopted, they are improved upon and revised to accommodate their broadening uses.
-
-\vfil\eject
 
 \bibliographystyle{abbrv}
 \bibliography{abthmsnp}
