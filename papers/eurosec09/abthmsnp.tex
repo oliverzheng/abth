@@ -88,10 +88,10 @@ A pair of hosts initiate contact and communicate by sending packets to each othe
 Each end of the connection is identified by an Internet Protocol (IP) address and a TCP port, both of which are determined prior to the establishment of connection.
 
 Each TCP packet is tagged with a sequence number, an acknowledgement number, and a receive window, herein referred to as seqnum, acknum, and rcvwnd, respectively.
-seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing.
+Seqnum represents the n-th byte of data transferred; acknum confirms the n-th byte of data received; rcvwnd corresponds to the number of bytes the host is willing to receive and capable of processing.
 Within each TCP header are also 8 control flags.
 After a connection is established (which is the only relevant timeframe ABTH deals with), each packet can confirm reception of data by setting the ACK flag and/or contain data; thus, some packets with no data have just the ACK flag set to denote an empty acknowledgement packet.
-For each data packet that is sent, a returning packet has to be received with acknum equal the seqnum of the sent packet to affirm packet delivery.
+For each data packet that is sent, a returning packet has to be received with acknum equal the seqnum + the length of the sent packet to affirm delivery of all consecutive bytes up to and including the last byte.
 A data packet with the same acknum may be received in lieu of an empty acknowledgement packet, in which case this packet needs confirmation as well.
 
 In order for the two hosts to be in a synchronized state where data packets can be received and processed as valid packets, the seqnum of one host must match the acknum of the other and vice versa. 
@@ -101,15 +101,16 @@ The next packet the client sends must entail seqnum 50 and acknum 100.
 If the client sends a data packet of 10 bytes, the client seqnum increases to 60 and the server must send an acknowledgement packet with seqnum 100 and acknum 60.
 
 When either hosts receives a packet containing an unexpected seqnum two scenarios may occur.
-If the received seqnum is within the range of the expected seqnum and the rcvwnd (the packet received arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent.
+If the received seqnum is within the range of the expected seqnum and the rcvwnd (the received packet arrived before another packet with the expected seqnum), the data is buffered and no acknowledgement packet is sent.
 (An acknowledgement packet would confirm the reception of the missing packet.)
-Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum inciting a TCP ack storm~\cite{joncheray:1995}, which is, in the perspective of an attacker, an undesirable effect.
+Otherwise, the packet is dropped and an acknowledgement packet is sent with an acknum of the expected seqnum, which may incite a TCP ack storm~\cite{joncheray:1995}, an undesirable effect in the perspective of an attacker.
 
 \subsection{Adversary Model}
 \label{sec:adversarymodel}
 
 For the TCP attacks to follow as well as ABTH, the main assumption is that attackers are able to listen to network traffic of a TCP session and inject spoofed packets into the network.
 We do not assume that the attacker has necessarily the capabilities of launching a denial-of-service attack or deleting or rerouting network traffic.
+Additionally, the attacker is assumed not to need to temper with the establishing of the TCP connection; the attacker may administer an attack on any live TCP connection anytime.
 
 In wired networks, sniffing and spoofing may be very limited.
 For example, network switches prevent sniffing in Ethernet and it is usually very difficult to sniff on routers.
@@ -176,8 +177,6 @@ ABTH improves upon conventional TCP session hijacking by allowing an attacker to
 It is a specific method of exercising TCP hijacking based on the application protocol without utilizing ARP poisoning or any other techniques below the transport layer.
 The technique assumes the adversary model described in Section~\ref{sec:adversarymodel}. 
 
-\subsection{Attack Details}
-
 Many application protocols intended for two-way communication, such as TELNET and FTP, maintain a persistent TCP connection.
 A typical method for ensuring the connection is open is for one of the hosts to periodically send an application-level command to the other host.
 Application-level commands, such as a ping, feature two characteristics of particular importance to ABTH: they prompt automatic response from the other host and they do not modify application states.
@@ -186,11 +185,12 @@ ABTH exploits these seemingly trivial application-level commands at the TCP leve
 In most application protocols, a ping to a host will provoke a response; using this knowledge the attacker can inflate the seqnum of the host.
 Assuming ping responses exceed the data length of pings, injecting certain multiples of pings directed at each host would counterbalance the difference created by an injected packet.
 
-As a result, an attacker can spoof a packet containing a malicious command and is able to minimize an ack storm by spoofing multiple pings to the hosts to bring up a lagging seqnum of a host to a desired seqnum. 
+As a result, an attacker can spoof a packet containing a malicious command and is able to minimize and quickly stop an ack storm by spoofing multiple pings to the hosts to bring up a lagging seqnum of a host to a desired seqnum. 
 The order in which these packets are injected should follow a specific rule.
-For a packet sent to each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd, in which case the packet contents (if any) is buffered by the receiver and no ack is returned, thus minimizing the ack storm.
-The very first packet, however, still incites an exchange of acks for the short duration of the attack; if performed correctly, ABTH should finish quickly enough for these acks to be virtually undetectable.
-Additionally, as later described in Section~\ref{sec:victimenvironment}, different implementations of TCP stacks process incoming packets differently (perhaps due to ambiguous interpretations of the TCP state machine~\cite{zaghal:model}) and alter the behavior of ABTH, for better and for worse.
+For a packet sent to each host, the seqnum should fall within the acceptable range of the expected seqnum and rcvwnd.
+For an RFC specified implementation of a TCP stack, the packet is dropped and an ack is returned; for the Windows TCP stack, the packet contents (if any) is buffered by the receiver and no ack is returned, thus minimizing the ack storm.
+If performed correctly, ABTH should finish quickly enough for these acks (if any) to be virtually undetectable.
+The distinctions among different TCP stack implementations are discussed in Section~\ref{sec:victimenvironment}, as different implementations process incoming packets differently (perhaps due to ambiguous interpretations of the TCP state machine~\cite{zaghal:model}) and alter the behavior of ABTH, for better and for worse.
 
 Once ABTH is completed, the connection is repaired and subsequent legitimate and/or illegitimate application commands can be received and processed successfully.
 In comparison to typical TCP hijacking methods which usually lead victims suspicious of an attack, ABTH exploits a combination of TCP and the application protocol to execute an attack that conforms to the specification of TCP and the application protocol and also maintains a small network footprint.
@@ -319,28 +319,27 @@ The attacker can utilize these two parameters by setting the address of the MS t
 Upon receiving the \texttt{RNG} command, the victim will connect to the specified MS to join an IM conversation with the user whose name and email was denoted in the command.
 
 The injection of the \texttt{RNG} packet has caused the victim's acknum to grow by 120, the size of the \texttt{RNG}, and the victim's expected seqnum of the next TCP packet to increase by 120 as well.
-As a result of this mismatch in the seqnum and acknums of the two hosts, further communication on this TCP connection will be dropped. 
+As a result of this mismatch in the seqnums and acknums of the two hosts, further communication on this TCP connection will be dropped.
 This mismatch can be resolved by utilizing ABTH to force the pretended source of the malicious packet, the NS, to actually send 120 bytes worth of data.
-Forcing one side of the connection to send 120 bytes of connection will also incur a cost in the sequence number space of the other side of the connection.
-As a result, we will need to balance the seqnum and acknums of both side of the connection to fill the 120 byte gap.
+Forcing one side of the connection to send 120 bytes of data will also incur a cost in the sequence number space of the other side of the connection.
+As a result, we will need to balance the seqnums and acknums of both sides of the connection to fill the 120 byte gap.
 In the case of MSNP, we can use the \texttt{PNG}/\texttt{QNG} combination to inflate the NS side of the connection and the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combination to inflate the client.
 Each \texttt{PNG}/\texttt{QNG} combination will elicit a cost of 8 bytes on the NS's seqnum and 5 bytes on the acknum.
-cost by 8 bytes on the NS. 
-The seqnum and acknum of client side of the connection can be via the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} commands which will elicit a cost of 60 bytes to the client's seqnum and 36 bytes to the acknum. 
-With this information, we can form two algebraic equations where 'x' represents the number of \texttt{PNG}/\texttt{QNG} combinations to send to the NS and 'y' represents the number of \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combinations to send to the client:
+The seqnum and acknum of client side of the connection can be increased via the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} commands which will elicit a cost of 60 bytes to the client's seqnum and 36 bytes to the acknum.
+With this information, we can form two algebraic equations where x represents the number of \texttt{PNG}/\texttt{QNG} combinations to send to the NS and y represents the number of \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combinations to send to the client:
 
 \begin{tabular}{ r l c l }
 \((1)\) &   \(NS~seqnum\)    &   \(=\)    &\(Client~acknum\) \\
-        &   \(8x\)           &   \(=\)    &\(60y\) \\
+        &   \(5x\)           &   \(=\)    &\(60y\) \\
         &   \(x\)            &   \(=\)    &\(12y\) \\
 \((2)\) &   \(Client~seqnum\)&   \(=\)    &\(NS~acknum\) \\
-        &   \(5x\)           &   \(=\)    &\(36y+120\)
+        &   \(8x\)           &   \(=\)    &\(36y+120\)
 \end{tabular}
 
 Putting these equations together, we get:
 
 \begin{tabular}{ r c l }
-\(5(12y)\)       &   \(=\)    &\(36y+120\) \\
+\(8(12y)\)       &   \(=\)    &\(36y+120\) \\
 \(\therefore y\) &   \(=\)    &\(2\) \\
 \(\therefore x\) &   \(=\)    &\(24\)
 \end{tabular}
@@ -368,10 +367,10 @@ In the case of WLM, it is crucial that ABTH is completed prior to the next clien
 Otherwise, the client would ping the NS and discover the imbalance in seqnums, leading to a timeout and disconnection.
 Depending on the resources of the attacker, ABTH can be reasonably accomplished within this timeframe, as our experiments---described in Section~\ref{sec:feasibility}---have demonstrated.
 
-Our attack tool calculates and generates prior to the attack the required commands to send, which allows it to complete an attack within 2 seconds after it observes a \texttt{PNG} command sent from the victim to a notification server.
+Our attack tool calculates and generates prior to the attack the required commands to send, which allows it to complete an attack within 2 seconds after it observes a \texttt{PNG} command sent from the victim to an NS.
 If the victim's client and the NS exchange a packet during the restoration phase, ABTH would fail in resynchronizing their TCP stacks.
 As a result, no network traffic can occur while ABTH is in progress. 
-Our measurements described in Section~\ref{sec:feasibility} suggest that 2 seconds are a sufficiently short interval for achieving success rate of 95\%.
+Our measurements described in Section~\ref{sec:feasibility} suggest that 2 seconds is a sufficiently short interval for achieving success rate of 95\%.
 Complex algorithms capable of adjusting to live traffic dynamically might improve it further. 
 
 ABTH requires the length of ping responses be greater than the commands issued to provoke them.
@@ -416,19 +415,19 @@ Our measurements obtained through monitoring several days of MSNP traffic sugges
 \label{sec:victimenvironment}
 
 The implementation of the TCP/IP stack on the victim's operating system dictates the behaviour of an ABTH attack.
-The quirk is different implementations behave differently upon receiving a packet with unexpected seq and ack nums.
-Gathered from empircal tests, we summarize three systems: an ideal implementation of our interpretation of the TCP packet processing (as shown in~\cite{zaghal:model}, and the implementation on Microsoft Windows and on Linux in Table~\ref{tab:implementations}.
-These only deal with packets with seq num within the acceptable range; otherwise, the packet is dropped and an ack is sent back.
+The quirk is that different implementations behave differently upon receiving a packet with unexpected seq and acknums.
+Gathered from empircal tests, we summarize three TCP stacks in Table~\ref{tab:implementations}: an ideal (non-existent) RFC specified interpretation of TCP packet processing (as shown in~\cite{zaghal:model}), and the TCP stack implementation on Microsoft Windows and on Linux.
+These only deal with packets with seqnum within the acceptable range (greater or equal to expected seqnum and smaller than the receive window); otherwise, the packet is dropped and an ack is sent back regardless of the implementation of the TCP stack.
 
 \begin{table*}[tbp]
 	\centering
 
-	\caption {Treatment of a packet with unexpected seq and ack numbers on different systems}
+	\caption {Treatment of a packet with unexpected seqnums and acknums on different TCP stacks}
 	\label{tab:implementations}
 
 	\begin{tabular}{c|c|c|c|c|c|c|c}
 		\hline
-		\textbf{Seq Num} & \textbf{Ack Num} & \multicolumn{2}{|c|}{\textbf{Ideal Implementation}} & \multicolumn{2}{|c|}{\textbf{Microsoft Windows}} & \multicolumn{2}{|c}{\textbf{Linux}} \\
+		\textbf{Seqnum} & \textbf{Acknum} & \multicolumn{2}{|c|}{\textbf{RFC Specified Interpretation}} & \multicolumn{2}{|c|}{\textbf{Microsoft Windows}} & \multicolumn{2}{|c}{\textbf{Linux}} \\
 		& & Accepted & Ack Returned & Accepted & Ack Returned & Accepted & Ack Returned \\
 		\hline
 		= Expected & $\leq$ Expected & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
@@ -442,22 +441,22 @@ These only deal with packets with seq num within the acceptable range; otherwise
 	\end{tabular}
 
 	\begin{flushleft}
-		The $>$ Expected value for Seq Num implies that the number is larger than the expected value but smaller than the receive window, thus falls within range of acceptable seq num.
+		The $>$ Expected value for Seqnum implies that the number is larger than the expected value but smaller than the receive window, thus falling within range of acceptable seqnum.
 	\end{flushleft}
 \end{table*}
 
-In the ideal implementation, each ping packet, PNG in the case of MSNP, would be met with an additional ack storm.
+In the RFC specified interpretation, each ping packet, \texttt{PNG} in the case of MSNP, would be met with an additional ack storm.
 In a publicly switched network where packet latency is typically 20ms, the MSNP ABTH attack that takes 2 seconds would generate roughly 2500 ack packets, assuming the attacker generates a packet every round trip time (40ms).
-Whether or not this statistic is acceptable for a TCP attack based on its environment and threat model is beyond the scope of this discussion.
+Whether or not this statistic is acceptable for a TCP attack based on its environment and threat model is beyond the scope of this discussion, although we believe this is quite low.
 
-In the Windows implementation, which was used extensively in our testing, no acks are returned for packets larger than expected seq and ack nums.
+In the Windows implementation, which was used extensively in our testing, no acks are returned for packets with seqnums and acknums larger than the expected (row 4 of Table~\ref{tab:implementations}).
 This directly resulted in elimination of ack storms all together; a total of two ack packets are sent by the victim.
 Our assumption in this case is that the NS of the .Net Messenger Service runs on Windows.
 
 In the case of Linux, the attack fails completely.
-Since a packet with the expected seq num but larger than expected ack num (row 2 of \ref{tab:implementations}) is accepted by the TCP stack, it renders descynchronization quite difficult.
-The host that receives response packets, QNGs in the case of MSNP, would accept them and pass them to the application.
-Any attempt to elicit response to fill a gap in seq num (caused by a malicious packet) would increase the ack num of the receiving host, and thus fail.
+Since a packet with the expected seqnum but larger than expected acknum (row 2 of Table~\ref{tab:implementations}) is accepted by the TCP stack, it renders complete descynchronization quite difficult.
+The host that receives response packets, \texttt{QNG} in the case of MSNP, would accept them and pass them to the application.
+Any attempt to elicit response to fill a gap in seqnum (caused by a malicious packet) would increase the acknum of the receiving host, and thus fail.
 
 \section{Conclusion}
 \label{sec:conclusion}
