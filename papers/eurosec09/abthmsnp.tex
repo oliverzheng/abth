@@ -284,34 +284,13 @@ The spoofed command creates the effect of identity impersonation.
 
 \subsection{Identity Spoofing}
 
-\begin{table*}[tbp]
+
+\begin{figure*}
 	\centering
-
-	\caption{Identity spoofing sequence numbers}
-	\label{tab:identityspoof}
-
-	\begin{tabular}{l l l r r r r r}
-		\hline
-		\hline
-		\textbf{Command} & \textbf{Sent By} & \textbf{Received By} & \textbf{Data Size} & \textbf{Client Seq} & \textbf{Client Ack} & \textbf{NS Seq} & \textbf{NS Ack} \\
-		\hline
-		\multicolumn{4}{l}{\textbf{Before Attack}} & 100 & 500 & 500 & 100 \\
-		RNG & Attacker & Victim Client & 120 & 100 & \textbf{620} & 500 & 100 \\
-		\multicolumn{8}{l}{\textbf{Begin ABTH}} \\
-		PNG & Attacker & NS & 5 & 100 & 620 & 500 & \textbf{105} \\
-		QNG & NS & Attacker & 8 & 100 & 620 & \textbf{508} & 105 \\
-		\multicolumn{4}{l}{\textbf{Repeat PNG/QNG exchange for 23 more times \dots}} & 100 & 620 & \textbf{692} & \textbf{220} \\
-		CHL & Attacker & Victim Client & 28 & 100 & \textbf{648} & 692 & 220 \\
-		QRY & Victim Client & Attacker & 60 & \textbf{160} & 648 & 692 & 220 \\
-		QRY & Attacker & Victim Client & 8 & 160 & \textbf{656} & 692 & 220 \\
-		CHL & Attacker & Victim Client & 28 & 100 & \textbf{684} & 692 & 220 \\
-		QRY & Victim Client & Attacker & 60 & \textbf{220} & 684 & 692 & 220 \\
-		QRY & Attacker & Victim Client & 8 & 220 & \textbf{692} & 692 & 220 \\
-		\hline
-		\hline
-		\multicolumn{4}{l}{\textbf{After ABTH}} & 220 & 692 & 692 & 220 \\
-	\end{tabular}
-\end{table*}
+	\caption{Identity Spoof Packet Flow}
+	\label{fig:identityspoof}
+	\includegraphics[scale=2]{graphics/packetGraph}
+\end{figure*}
 
 In order to accomplish an identity spoof, we will utilize the official WLM client, the live .NET Messaging Service, and a custom-made rogue WLM mixer server. 
 The attacker injects a \texttt{RNG} command from the NS to the victim; this control packet is used by NS to invite the client to a new conversation session and contains two items of interest: the address of an MS and the email and name of the contact that invited the victim to the conversation.
@@ -323,6 +302,7 @@ As a result of this mismatch in the seqnums and acknums of the two hosts, furthe
 This mismatch can be resolved by utilizing ABTH to force the pretended source of the malicious packet, the NS, to actually send 120 bytes worth of data.
 Forcing one side of the connection to send 120 bytes of data will also incur a cost in the sequence number space of the other side of the connection.
 As a result, we will need to balance the seqnums and acknums of both sides of the connection to fill the 120 byte gap.
+
 In the case of MSNP, we can use the \texttt{PNG}/\texttt{QNG} combination to inflate the NS side of the connection and the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} combination to inflate the client.
 Each \texttt{PNG}/\texttt{QNG} combination will elicit a cost of 8 bytes on the NS's seqnum and 5 bytes on the acknum.
 The seqnum and acknum of client side of the connection can be increased via the \texttt{CHL}/\texttt{QRY}/\texttt{QRY} commands which will elicit a cost of 60 bytes to the client's seqnum and 36 bytes to the acknum.
@@ -345,13 +325,15 @@ Putting these equations together, we get:
 \end{tabular}
 
 As a result, we will need to inject 2 \texttt{CHL} commands to the client and 24 \texttt{PNG} commands to the NS.
-Let us assume that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Table~\ref{tab:identityspoof}.
-Each command is sent or received by the attacker in the order listed in Table~\ref{tab:identityspoof}.
 
+Let us assume, for the sake of simplicity, that prior to the spoofed packet, the seqnums of the client and the NS are 100 and 500, respectively, as shown in the first row of Figure~\ref{fig:identityspoof}.
+Figure~\ref{fig:identityspoof} outlines the flow of injected packets between the two hosts.
+The dotted arrows represent the packets the receiving hosts sends as a response to the injected packets.
+These packets are still received by the other end of the connection but are largely ignored as, in the perspective of the receiver, the packet contains an incorrect seqnum and acknum.
 As the last row shows, with matching seqnums and acknums, ABTH has successfully completed its series of application specific commands and has successfully resynchronized the TCP connection.
 The connection is now is ready to transmit legitimate and/or illegitimate packets further.
 
-As a result of spoofing the \texttt{RNG} command followed by synchronization using ABTH, the attacker is able to send/receive any number of IM chat messages to/from the victim, while impersonating the user specified in the \texttt{RNG} command.
+As a result of spoofing the \texttt{RNG} command and seqnum and acknum re-synchronization via ABTH, the attacker is able to send/receive any number of IM chat messages to/from the victim, while impersonating the user specified in the \texttt{RNG} command.
 As the victim's WLM client is unable to differentiate between a rogue mixer server and a legitimate one, it thereby cannot recognize the illegitimacy of the conversation.
 From this point on, the attacker can continue his/her conversation with the victim until either the MS connection times out or the victim signs off.
 
@@ -416,8 +398,8 @@ Our measurements obtained through monitoring several days of MSNP traffic sugges
 
 The implementation of the TCP/IP stack on the victim's operating system dictates the behaviour of an ABTH attack.
 The quirk is that different implementations behave differently upon receiving a packet with unexpected seq and acknums.
-Gathered from empircal tests, we summarize three TCP stacks in Table~\ref{tab:implementations}: an ideal (non-existent) RFC specified interpretation of TCP packet processing (as shown in~\cite{zaghal:model}), and the TCP stack implementation on Microsoft Windows and on Linux.
-These only deal with packets with seqnum within the acceptable range (greater or equal to expected seqnum and smaller than the receive window); otherwise, the packet is dropped and an ack is sent back regardless of the implementation of the TCP stack.
+Gathered from empircal tests, we summarize three TCP stacks in Table~\ref{tab:implementations}: an ideal (non-existent) RFC specified interpretation of TCP packet processing (as shown in~\cite{zaghal:model}), and the TCP stack implementation on Microsoft Windows and Linux.
+The above implementations only deal with packets with seqnum within the acceptable range (greater or equal to expected seqnum and smaller than the receive window); otherwise, the packet is dropped and an ack is sent back regardless of the implementation of the TCP stack.
 
 \begin{table*}[tbp]
 	\centering
@@ -441,7 +423,7 @@ These only deal with packets with seqnum within the acceptable range (greater or
 	\end{tabular}
 
 	\begin{flushleft}
-		The $>$ Expected value for Seqnum implies that the number is larger than the expected value but smaller than the receive window, thus falling within range of acceptable seqnum.
+		The $>$ Expected value for Seqnum implies that the number is larger than the expected value but smaller than the receive window, thus falling within the range of acceptable seqnum.
 	\end{flushleft}
 \end{table*}
 
@@ -454,9 +436,9 @@ This directly resulted in elimination of ack storms all together; a total of two
 Our assumption in this case is that the NS of the .Net Messenger Service runs on Windows.
 
 In the case of Linux, the attack fails completely.
-Since a packet with the expected seqnum but larger than expected acknum (row 2 of Table~\ref{tab:implementations}) is accepted by the TCP stack, it renders complete descynchronization quite difficult.
+Since a packet with the expected seqnum but larger than expected acknum (row 2 of Table~\ref{tab:implementations}) is accepted by the TCP stack, it renders complete desynchronization quite difficult.
 The host that receives response packets, \texttt{QNG} in the case of MSNP, would accept them and pass them to the application.
-Any attempt to elicit response to fill a gap in seqnum (caused by a malicious packet) would increase the acknum of the receiving host, and thus fail.
+Any attempt to elicit a response to fill a gap in seqnum (caused by a malicious packet) would increase the acknum of the receiving host, and thus fail.
 
 \section{Conclusion}
 \label{sec:conclusion}
